@@ -1,15 +1,15 @@
 'use client'
 
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { bitable } from '@lark-base-open/js-sdk'
-import Form from 'antd/es/form/Form'
+import Form, { useForm } from 'antd/es/form/Form'
 import Input from 'antd/es/input/Input'
-import Button from 'antd/es/button'
 import FormItem from 'antd/es/form/FormItem'
-import message from 'antd/es/message'
 import { getAuthMeta, install, IOpenSessionData } from '../actions'
 import { useEffect, useRef, useState } from 'react'
 import { Spin } from 'antd'
+import { useMessage } from '@/lib/hooks/useMessage'
+import { Button } from '@/components/ui/button'
 
 async function auth() {
   const meta = await bitable.base.getSelection()
@@ -33,7 +33,7 @@ export default function InstallPage() {
   }, [])
 
   const [loading, setLoading] = useState(false)
-  const [messageApi, contextHolder] = message.useMessage()
+  const [messageApi, contextHolder] = useMessage()
   const router = useRouter()
   useEffect(() => {
     auth().then(authMeta => {
@@ -47,14 +47,18 @@ export default function InstallPage() {
       })
     })
   }, [])
-  const handleSaveAuthMeta = async (meta: IOpenSessionData) => {
+  const [form] = useForm<IOpenSessionData>()
+
+  const handleSaveAuthMeta = async () => {
+    const meta = await form.validateFields()
+    // const meta = form.getFieldsValue()
     try {
       const userId = await bitable.bridge.getUserId()
       const selection = await bitable.base.getSelection()
-      const baseId=selection?.baseId||'';
-      if(!baseId||!userId) {
+      const baseId = selection?.baseId || ''
+      if (!baseId || !userId || !meta.appToken || !meta.personalBaseToken) {
         messageApi.error({
-            content:`缺少参数${JSON.stringify({baseId,userId})}`
+          content: `缺少参数${JSON.stringify({ baseId, userId })}`
         })
         throw new Error(`缺少参数`)
       }
@@ -64,12 +68,7 @@ export default function InstallPage() {
         userId
       })
       messageApi.success({ content: '安装成功' })
-      await new Promise((res, rej) => {
-        setTimeout(() => {
-          res(1)
-        }, 3000)
-      })
-      redirect('/')
+      router.replace('/')
     } catch (e) {
       messageApi.error({
         content: '安装失败'
@@ -85,17 +84,33 @@ export default function InstallPage() {
   }
   return (
     <div className="flex h-[calc(100vh-theme(spacing.16))] items-center justify-center py-10">
-      <Form<IOpenSessionData> onFinish={handleSaveAuthMeta}>
-        <FormItem name="appToken" label="token" required>
+      <Form<IOpenSessionData> form={form}>
+        <FormItem
+          name="appToken"
+          label="token"
+          rules={[
+            {
+              required: true,
+              message: '必填'
+            }
+          ]}
+        >
           <Input />
         </FormItem>
-        <FormItem name="personalBaseToken" label="personalBaseToken" required>
+        <FormItem
+          name="personalBaseToken"
+          label="personalBaseToken"
+          rules={[
+            {
+              required: true,
+              message: '必填'
+            }
+          ]}
+        >
           <Input />
         </FormItem>
         <FormItem wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            安装
-          </Button>
+          <Button onClick={e => handleSaveAuthMeta()} >安装</Button>
         </FormItem>
       </Form>
     </div>

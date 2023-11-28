@@ -76,3 +76,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  background-color: transparent; /* 2 */
+}
