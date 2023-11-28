@@ -1,2 +1,2 @@
-export { GET, POST } from '@/auth'
+// export { GET, POST } from '@/install'
 export const runtime = 'edge'

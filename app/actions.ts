@@ -1,11 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { kv } from '@vercel/kv'
 
-import { auth } from '@/auth'
+import { auth } from '@/install'
 import { type Chat } from '@/lib/types'
+import { cookieKey } from '@/lib/utils'
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
@@ -75,7 +77,7 @@ export async function clearChats() {
 
   const chats: string[] = await kv.zrange(`user:chat:${session.user.id}`, 0, -1)
   if (!chats.length) {
-  return redirect('/')
+    return redirect('/')
   }
   const pipeline = kv.pipeline()
 
@@ -117,4 +119,47 @@ export async function shareChat(chat: Chat) {
   await kv.hmset(`chat:${chat.id}`, payload)
 
   return payload
+}
+
+export interface IOpenSessionData {
+  appToken: string
+  personalBaseToken: string
+  baseId: string
+  userId: string
+}
+
+export async function getAuthMeta(): Promise<IOpenSessionData | null> {
+  const baseIdCookie = cookies().get(cookieKey)
+  if (!baseIdCookie?.value) return null
+  const baseId = baseIdCookie.value
+  const authMeta: IOpenSessionData | null = await kv.get(`authMeta:${baseId}`)
+
+  if (authMeta && authMeta.appToken && authMeta.personalBaseToken) {
+    return authMeta
+  }
+  return null
+}
+export async function install(data: IOpenSessionData) {
+  await kv.set(`authMeta:${data.baseId}`, JSON.stringify(data))
+  cookies().set({
+    name: cookieKey,
+    value: data.baseId,
+    httpOnly: true,
+    path: '/',
+    sameSite: 'none',
+    secure: true
+  })
+  return cookies().toString()
+}
+export async function logout(key: string) {
+  await kv.del(`authMeta:${key}`)
+  cookies().set({
+    name: cookieKey,
+    value: '',
+    httpOnly: true,
+    path: '/',
+    sameSite: 'none',
+    secure: true
+  })
+  return cookies().toString()
 }

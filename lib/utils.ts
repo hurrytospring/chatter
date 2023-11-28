@@ -41,3 +41,5 @@ export function formatDate(input: string | number | Date): string {
     year: 'numeric'
   })
 }
+
+export const cookieKey='chatter-baseId';

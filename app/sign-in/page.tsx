@@ -1,4 +1,4 @@
-import { auth } from '@/auth'
+import { auth } from '@/install'
 import { LoginButton } from '@/components/login-button'
 import { redirect } from 'next/navigation'
 
