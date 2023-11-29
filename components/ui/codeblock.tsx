@@ -7,7 +7,8 @@ import { FC, memo, useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import {
   coldarkDark,
-  materialLight
+  materialLight,
+  oneLight
 } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
 import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard'
@@ -15,7 +16,7 @@ import { IconCheck, IconCopy, IconDownload } from '@/components/ui/icons'
 import { Button } from '@/components/ui/button'
 import { runCode } from '@/app/code_runner'
 import Space from 'antd/es/space'
-import { Tag } from 'antd'
+import { Card, Tag } from 'antd'
 
 interface Props {
   language: string
@@ -65,6 +66,9 @@ export const generateRandomString = (length: number, lowercase = false) => {
 const CodeBlock: FC<Props> = memo(({ language, value }) => {
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
   const [runResult, setRunResult] = useState('')
+  const [runStatus, setRunStatus] = useState<
+    'processing' | 'error' | 'success' | ''
+  >('')
   const downloadAsFile = () => {
     if (typeof window === 'undefined') {
       return
@@ -100,14 +104,17 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
   const handleRunCode = async (code: string) => {
     try {
       setRunResult('')
+      setRunStatus('processing')
       const result = await runCode(code)
       setRunResult(`//run success 
       ${JSON.stringify(result, null, 2)}`)
+      setRunStatus('success')
     } catch (e) {
       console.log('run code errrrrrr')
       console.error(e)
       setRunResult(`//run fail 
       ${JSON.stringify(e, null, 2)}`)
+      setRunStatus('error')
     }
     console.log(`run code success`)
   }
@@ -138,32 +145,31 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
           </Button>
         </div>
       </div>
-      {runResult && (
+      {runStatus && (
         <>
-        <Tag>执行结果</Tag>
-        <SyntaxHighlighter
-          language={'javascript'}
-          style={materialLight}
-          PreTag="div"
-          customStyle={{
-            margin: 0,
-            width: '100%',
-            background: 'transparent',
-            padding: '1.5rem 1rem'
-          }}
-          lineNumberStyle={{
-            userSelect: 'none'
-          }}
-          codeTagProps={{
-            style: {
-              fontSize: '0.9rem',
-              fontFamily: 'var(--font-mono)'
-            }
-          }}
-        >
-          {runResult}
-        </SyntaxHighlighter>
-        <Space direction="vertical" size="small" />
+          <Card title={<Tag color={runStatus}>执行结果</Tag>} style={{padding:0}}>
+            <SyntaxHighlighter
+              language={'javascript'}
+              style={materialLight}
+              PreTag="div"
+              customStyle={{
+                margin: 0,
+                width: '100%',
+                padding: '1.5rem 1rem'
+              }}
+              lineNumberStyle={{
+                userSelect: 'none'
+              }}
+              codeTagProps={{
+                style: {
+                  fontSize: '0.9rem',
+                  fontFamily: 'var(--font-mono)'
+                }
+              }}
+            >
+              {runResult}
+            </SyntaxHighlighter>
+          </Card>
         </>
       )}
       <SyntaxHighlighter
