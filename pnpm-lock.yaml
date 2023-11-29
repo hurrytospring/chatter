@@ -12,6 +12,7 @@ specifiers:
   '@radix-ui/react-switch': ^1.0.3
   '@radix-ui/react-tooltip': ^1.0.7
   '@tailwindcss/typography': ^0.5.10
+  '@types/lodash-es': ^4.17.12
   '@types/node': ^20.10.0
   '@types/react': ^18.2.38
   '@types/react-dom': ^18.2.17
@@ -32,6 +33,7 @@ specifiers:
   focus-trap-react: ^10.2.3
   geist: ^1.1.0
   lodash: ^4.17.21
+  lodash-es: ^4.17.21
   nanoid: ^5.0.3
   next: '14.0.3 '
   next-auth: 5.0.0-beta.3
@@ -64,6 +66,7 @@ dependencies:
   '@radix-ui/react-slot': 1.0.2_1faf1ff35f8e222d94683042104d5355
   '@radix-ui/react-switch': 1.0.3_fd57044a5ed499fbd4dbcd1718faa57c
   '@radix-ui/react-tooltip': 1.0.7_fd57044a5ed499fbd4dbcd1718faa57c
+  '@types/lodash-es': 4.17.12
   '@vercel/analytics': 1.1.1
   '@vercel/kv': 1.0.0
   '@vercel/og': 0.5.20
@@ -74,6 +77,7 @@ dependencies:
   focus-trap-react: 10.2.3_react-dom@18.2.0+react@18.2.0
   geist: 1.1.0_next@14.0.3
   lodash: 4.17.21
+  lodash-es: 4.17.21
   nanoid: 5.0.3
   next: 14.0.3_react-dom@18.2.0+react@18.2.0
   next-auth: 5.0.0-beta.3_next@14.0.3+react@18.2.0
@@ -1304,6 +1308,16 @@ packages:
 
   /@types/katex/0.16.7:
     resolution: {integrity: sha512-HMwFiRujE5PjrgwHQ25+bsLJgowjGjm5Z8FVSf0N6PwgJrwxH0QxzHYDcKsTfV3wva0vzrpqMTJS2jXPr5BMEQ==}
+    dev: false
+
+  /@types/lodash-es/4.17.12:
+    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
+    dependencies:
+      '@types/lodash': 4.14.202
+    dev: false
+
+  /@types/lodash/4.14.202:
+    resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
     dev: false
 
   /@types/mdast/3.0.15:
@@ -3261,6 +3275,10 @@ packages:
     dependencies:
       p-locate: 5.0.0
     dev: true
+
+  /lodash-es/4.17.21:
+    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+    dev: false
 
   /lodash.castarray/4.4.0:
     resolution: {integrity: sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==}

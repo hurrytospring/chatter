@@ -8,6 +8,7 @@ import { kv } from '@vercel/kv'
 import { auth } from '@/install'
 import { type Chat } from '@/lib/types'
 import { cookieKey } from '@/lib/utils'
+import memoize from 'lodash-es/memoize'
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
@@ -127,11 +128,7 @@ export interface IOpenSessionData {
   baseId: string
   userId: string
 }
-
-export async function getAuthMeta(): Promise<IOpenSessionData | null> {
-  const baseIdCookie = cookies().get(cookieKey)
-  if (!baseIdCookie?.value) return null
-  const baseId = baseIdCookie.value
+async function getAuthMetaById(baseId:string){
   const authMeta: IOpenSessionData | null = await kv.get(`authMeta:${baseId}`)
 
   if (authMeta && authMeta.appToken && authMeta.personalBaseToken) {
@@ -139,6 +136,16 @@ export async function getAuthMeta(): Promise<IOpenSessionData | null> {
   }
   return null
 }
+const getAuthMetaById_memo=memoize(getAuthMetaById)
+
+export async function getAuthMeta(): Promise<IOpenSessionData | null> {
+  const baseIdCookie = cookies().get(cookieKey)
+  if (!baseIdCookie?.value) return null
+  const baseId = baseIdCookie.value
+  return getAuthMetaById_memo(baseId)
+
+}
+
 export async function install(data: IOpenSessionData) {
   await kv.set(`authMeta:${data.baseId}`, JSON.stringify(data))
   cookies().set({
