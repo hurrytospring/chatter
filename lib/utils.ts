@@ -42,4 +42,7 @@ export function formatDate(input: string | number | Date): string {
   })
 }
 
-export const cookieKey='chatter-baseId';
+export const cookieKey = 'chatter-baseId'
+
+export const sleep = (interval: number) =>
+  new Promise(resolve => setTimeout(resolve, interval))

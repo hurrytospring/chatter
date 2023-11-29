@@ -9,6 +9,7 @@ import { auth } from '@/install'
 import { type Chat } from '@/lib/types'
 import { cookieKey } from '@/lib/utils'
 import memoize from 'lodash-es/memoize'
+import { IOpenCellValue } from '@lark-base-open/js-sdk'
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
