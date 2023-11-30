@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button'
 import { runCode } from '@/app/code_runner'
 import Space from 'antd/es/space'
 import { Card, Tag } from 'antd'
+import { bitable} from '@lark-base-open/js-sdk'
+
 
 interface Props {
   language: string
@@ -105,7 +107,7 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
     try {
       setRunResult('')
       setRunStatus('processing')
-      const result = await runCode(code)
+      const result = await runCode(code,{bitable})
       setRunResult(`//run success 
       ${JSON.stringify(result, null, 2)}`)
       setRunStatus('success')

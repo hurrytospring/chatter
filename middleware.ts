@@ -20,10 +20,10 @@ export async function middleware(request: NextRequest) {
   // if (!authMetaStr) {
   //   return NextResponse.rewrite(new URL('/install', request.url))
   // }
-  const baseIdCookie = request.cookies.get(cookieKey)
-  if (!baseIdCookie?.value) {
-    return NextResponse.redirect(new URL('/install', request.url))
-  }
+  // const baseIdCookie = request.cookies.get(cookieKey)
+  // if (!baseIdCookie?.value) {
+  //   return NextResponse.redirect(new URL('/install', request.url))
+  // }
   return NextResponse.next()
 }
 export const config = {

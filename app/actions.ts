@@ -140,6 +140,12 @@ async function getAuthMetaById(baseId:string){
 const getAuthMetaById_memo=memoize(getAuthMetaById)
 
 export async function getAuthMeta(): Promise<IOpenSessionData | null> {
+  return {
+    appToken: 'string',
+    personalBaseToken: 'string',
+    baseId: 'string',
+    userId: 'userId222'
+  }
   const baseIdCookie = cookies().get(cookieKey)
   if (!baseIdCookie?.value) return null
   const baseId = baseIdCookie.value

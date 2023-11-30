@@ -12,7 +12,10 @@
     "format:check": "prettier --check \"{app,lib,components}**/*.{ts,tsx,mdx}\" --cache"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@lark-base-open/js-sdk": "^0.3.4",
+    "@mui/material": "^5.14.18",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -34,6 +37,7 @@
     "geist": "^1.1.0",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
+    "material": "link:@types/@mui/material",
     "nanoid": "^5.0.3",
     "next": "14.0.3 ",
     "next-auth": "5.0.0-beta.3",
