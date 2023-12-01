@@ -17,8 +17,8 @@ import { Button } from '@/components/ui/button'
 import { runCode } from '@/app/code_runner'
 import Space from 'antd/es/space'
 import { Card, Tag } from 'antd'
-import { bitable} from '@lark-base-open/js-sdk'
-
+import { bitable, FieldType } from '@lark-base-open/js-sdk'
+import lodash from 'lodash'
 
 interface Props {
   language: string
@@ -107,7 +107,7 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
     try {
       setRunResult('')
       setRunStatus('processing')
-      const result = await runCode(code,{bitable})
+      const result = await runCode(code, { bitable, FieldType, lodash })
       setRunResult(`//run success 
       ${JSON.stringify(result, null, 2)}`)
       setRunStatus('success')
@@ -149,7 +149,10 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
       </div>
       {runStatus && (
         <>
-          <Card title={<Tag color={runStatus}>执行结果</Tag>} style={{padding:0}}>
+          <Card
+            title={<Tag color={runStatus}>执行结果</Tag>}
+            style={{ padding: 0 }}
+          >
             <SyntaxHighlighter
               language={'javascript'}
               style={materialLight}

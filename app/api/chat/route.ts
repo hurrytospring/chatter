@@ -4,6 +4,7 @@ import OpenAI from 'openai'
 
 import { auth } from '@/install'
 import { nanoid } from '@/lib/utils'
+import { functions } from './functions'
 
 export const runtime = 'edge'
 
@@ -30,7 +31,8 @@ export async function POST(req: Request) {
     model: 'gpt-4-1106-preview',
     messages,
     temperature: 0.7,
-    stream: true
+    stream: true,
+    functions
   })
 
   const stream = OpenAIStream(res, {
@@ -58,7 +60,31 @@ export async function POST(req: Request) {
         score: createdAt,
         member: `chat:${id}`
       })
-    }
+    },
+    // experimental_onFunctionCall: async (
+    //   { name, arguments: args },
+    //   createFunctionCallMessages,
+    // ) => {
+    //   // if you skip the function call and return nothing, the `function_call`
+    //   // message will be sent to the client for it to handle
+    //   if (name === 'get_current_weather') {
+    //     // Call a weather API here
+    //     const weatherData = {
+    //       temperature: 20,
+    //       unit: args.format === 'celsius' ? 'C' : 'F',
+    //     };
+   
+    //     // `createFunctionCallMessages` constructs the relevant "assistant" and "function" messages for you
+    //     const newMessages = createFunctionCallMessages(weatherData);
+    //     return openai.chat.completions.create({
+    //       messages: [...messages, ...newMessages],
+    //       stream: true,
+    //       model: 'gpt-4-1106-preview',
+    //       // see "Recursive Function Calls" below
+    //       functions,
+    //     });
+    //   }
+    // },
   })
 
   return new StreamingTextResponse(stream)

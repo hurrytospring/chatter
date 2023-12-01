@@ -3,9 +3,9 @@
 import { nanoid } from '@/lib/utils'
 import { Chat } from '@/components/chat'
 import { Message } from 'ai'
-import { plugin_prompt } from '@/prompt/prompt'
+import plugin_prompt from '@/prompt/base_open_plugin.md'
 import { useEffect, useState } from 'react'
-import { Spin } from 'antd'
+import  CircularProgress from '@mui/material/CircularProgress';
 import { bitable } from '@lark-base-open/js-sdk'
 
 async function getInitPrompt() {
@@ -19,7 +19,6 @@ export default function IndexPage() {
   const [initPrompt, setInitPrompt] = useState('')
   useEffect(() => {
     getInitPrompt().then(p => {
-      console.log(8888, p)
       setInitPrompt(p)
       setLoading(false)
     })
@@ -31,6 +30,6 @@ export default function IndexPage() {
       role: 'user'
     }
   ]
-  if (loading) return <Spin />
+  if (loading) return <CircularProgress />
   return <Chat id={id} initialMessages={message} />
 }

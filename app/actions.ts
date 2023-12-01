@@ -148,8 +148,8 @@ export async function getAuthMeta(): Promise<IOpenSessionData | null> {
   }
   const baseIdCookie = cookies().get(cookieKey)
   if (!baseIdCookie?.value) return null
-  const baseId = baseIdCookie.value
-  return getAuthMetaById_memo(baseId)
+  const baseId = baseIdCookie?.value
+  return getAuthMetaById_memo(baseId||'')
 
 }
 

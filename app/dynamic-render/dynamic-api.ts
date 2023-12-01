@@ -28,7 +28,7 @@ async function runCode(userCode: string) {
 async function executeFn(id:string,fn:string) {
     // await getCodeById
 
-    const fns=await runCode(beCode);
+    const fns=await runCode('beCode');
     return fns['fn']()
 
 }

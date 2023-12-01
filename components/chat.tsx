@@ -21,13 +21,51 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { toast } from 'react-hot-toast'
 import { usePathname, useRouter } from 'next/navigation'
+import { ChatRequest, FunctionCallHandler, nanoid } from 'ai'
+import { runCode } from '@/app/code_runner'
+import { FieldType, bitable } from '@lark-base-open/js-sdk'
+import lodash from 'lodash'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: Message[]
   id?: string
 }
+const functionCallHandler: FunctionCallHandler = async (
+  chatMessages,
+  functionCall
+) => {
+  console.log('start callllllllll',functionCall)
+  if (functionCall.name === 'run_javascript_code') {
+    const code = JSON.parse(functionCall.arguments||`{}`).code || ''
+    console.log('start callllllllll code',code)
 
+    let result:any = ''
+    if (code) {
+      try {
+        result = await runCode(code, { bitable, FieldType, lodash })
+      } catch (e) {
+        result = { error: e }
+      }
+    }
+    console.log('end callllllllll',result)
+
+    const functionResponse: ChatRequest = {
+      messages: [
+        ...chatMessages,
+        {
+          id: nanoid(),
+          name: 'run_javascript_code',
+          role: 'function' as const,
+          content: JSON.stringify({
+            result
+          })
+        }
+      ]
+    }
+    return functionResponse
+  }
+}
 export function Chat({ id, initialMessages, className }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
@@ -37,6 +75,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   )
   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
+
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
       initialMessages,
@@ -55,7 +94,8 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
           router.push(`/chat/${id}`, { shallow: true })
           router.refresh()
         }
-      }
+      },
+      experimental_onFunctionCall: functionCallHandler,
     })
   return (
     <>

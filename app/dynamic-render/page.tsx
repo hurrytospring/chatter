@@ -2,7 +2,7 @@
 
 import * as MUI from '@mui/material'
 import { runCodeSync } from '../code_runner'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 function run() {
   // const code=getCodeById
@@ -53,7 +53,6 @@ function run() {
     };
     return React.createElement(RestaurantMenu)
     `
-    console.log(99999,MUI)
   return runCodeSync(code, { MUI, React })
 }
 

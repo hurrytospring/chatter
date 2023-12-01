@@ -10,4 +10,12 @@ module.exports = {
       },
     ],
   },
+  experimental: {
+    turbo: {
+      rules: {
+        // Option format
+        '*.md': ['raw-loader']
+      },
+    },
+  },
 };
