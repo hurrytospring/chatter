@@ -4,7 +4,7 @@ import OpenAI from 'openai'
 
 import { auth } from '@/install'
 import { nanoid } from '@/lib/utils'
-import { functions } from './functions'
+import { functions } from '@/lib/functions'
 
 export const runtime = 'edge'
 
