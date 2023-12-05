@@ -31,19 +31,19 @@ export async function runCode(userCode: string, ctx: Record<string, any>) {
 const genStaticSyncCode = (userCode: string, keys: string[]) => {
   const code = trim(userCode, ';')
   return `
-   function asyncOperation(${keys.join(',')}) {
+   function syncOperation(${keys.join(',')}) {
    return  (function (){${code}})()
   }
-  return asyncOperation(${keys.join(
+  return syncOperation(${keys.join(
     ','
   )})
 `
 }
-export async function runCodeSync(userCode: string, ctx: Record<string, any>) {
+export function runCodeSync(userCode: string, ctx: Record<string, any>) {
   const keys = Object.keys(ctx)
   const code = genStaticSyncCode(userCode, keys)
   console.log(1111,code)
   const dynamicFunction = new Function(...keys, code)
   console.log('ctxxxxx',keys.map(key => ctx[key]))
-  return await dynamicFunction(...keys.map(key => ctx[key]))
+  return  dynamicFunction(...keys.map(key => ctx[key]))
 }

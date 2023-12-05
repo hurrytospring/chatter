@@ -1,4 +1,4 @@
-import { type Message } from 'ai'
+import { FunctionCall, FunctionCallHandler, type Message } from 'ai'
 
 export interface Chat extends Record<string, any> {
   id: string
@@ -16,3 +16,6 @@ export type ServerActionResult<Result> = Promise<
       error: string
     }
 >
+
+
+export type FunctionCallHandlerWithAssert=FunctionCallHandler & {assert:(fn:FunctionCall)=>boolean}

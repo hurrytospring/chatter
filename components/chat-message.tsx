@@ -10,6 +10,7 @@ import { CodeBlock } from '@/components/ui/codeblock'
 import { MemoizedReactMarkdown } from '@/components/markdown'
 import { IconOpenAI, IconUser } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
+import { langCompMapping } from '../lib/custom-code-block'
 
 export interface ChatMessageProps {
   message: Message
@@ -51,7 +52,11 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
               }
 
               const match = /language-(\w+)/.exec(className || '')
-
+              const language = (match && match[1]) || ''
+              const CustomRender = langCompMapping[language]
+              if (CustomRender) {
+                return <CustomRender code={children} />
+              }
               if (inline) {
                 return (
                   <code className={className} {...props}>

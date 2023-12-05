@@ -11,23 +11,28 @@ import { bitable } from '@lark-base-open/js-sdk'
 async function getInitPrompt() {
   const table = await bitable.base.getActiveTable()
   const metaList = await table.getFieldMetaList()
-  return plugin_prompt.replaceAll(`{{tableSchema}}`, JSON.stringify(metaList))
+  return  JSON.stringify(metaList);
 }
 export default function IndexPage() {
   const id = nanoid()
   const [loading, setLoading] = useState(true)
-  const [initPrompt, setInitPrompt] = useState('')
+  const [initCtx, setInitCtx] = useState('')
   useEffect(() => {
     getInitPrompt().then(p => {
-      setInitPrompt(p)
+      setInitCtx(p)
       setLoading(false)
     })
   }, [])
   const message: Message[] = [
     {
       id: nanoid(),
-      content: initPrompt,
-      role: 'user'
+      content: plugin_prompt,
+      role: 'system'
+    },
+    {
+      id: nanoid(),
+      content:`当前表结构为：${initCtx}, 其中含有用户字段名，id等信息，你在生成代码时，可以结合用户输入从其中直接获取一些值，作为常量使用` ,
+      role: 'system'
     }
   ]
   if (loading) return <CircularProgress />
