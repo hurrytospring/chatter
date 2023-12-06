@@ -33,7 +33,7 @@ const initialMessages: Message[] = [
   }
 ]
 export const useSysAgent = () => {
-  const { reload, setMessages, isLoading } = useChat({ api: 'api/chat/common' ,body:{functions:[codeRunnerDef]},experimental_onFunctionCall(chatMessages, functionCall) {
+  const { reload, setMessages, isLoading } = useChat({ api: 'api/chat-common' ,body:{functions:[codeRunnerDef]},experimental_onFunctionCall(chatMessages, functionCall) {
       
   },})
   const handleCall: FunctionCallHandler = async (

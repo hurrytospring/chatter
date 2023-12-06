@@ -25,6 +25,7 @@ import { ChatRequest, FunctionCallHandler, nanoid } from 'ai'
 import { runCode } from '@/app/code_runner'
 import { FieldType, bitable } from '@lark-base-open/js-sdk'
 import lodash from 'lodash'
+import { pageCreatorFnDef, usePageCreatorAgent } from '@/lib/hooks/use-page-creator'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 export interface ChatProps extends React.ComponentProps<'div'> {
@@ -35,12 +36,12 @@ const functionCallHandler: FunctionCallHandler = async (
   chatMessages,
   functionCall
 ) => {
-  console.log('start callllllllll',functionCall)
+  console.log('start callllllllll', functionCall)
   if (functionCall.name === 'run_javascript_code') {
-    const code = JSON.parse(functionCall.arguments||`{}`).code || ''
-    console.log('start callllllllll code',code)
+    const code = JSON.parse(functionCall.arguments || `{}`).code || ''
+    console.log('start callllllllll code', code)
 
-    let result:any = ''
+    let result: any = ''
     if (code) {
       try {
         result = await runCode(code, { bitable, FieldType, lodash })
@@ -48,7 +49,7 @@ const functionCallHandler: FunctionCallHandler = async (
         result = { error: e }
       }
     }
-    console.log('end callllllllll',result)
+    console.log('end callllllllll', result)
 
     const functionResponse: ChatRequest = {
       messages: [
@@ -75,14 +76,16 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   )
   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
-
+  const pageCreatorAgentHandle = usePageCreatorAgent()
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
+      api: '/api/chat-common',
       initialMessages,
       id,
       body: {
         id,
-        previewToken
+        previewToken,
+        functions:[pageCreatorFnDef]
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -95,7 +98,13 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
           router.refresh()
         }
       },
-      experimental_onFunctionCall: functionCallHandler,
+      experimental_onFunctionCall: (chatMessages, functionCall) => {
+        console.log('calledddddd,',functionCall)
+        if (pageCreatorAgentHandle.assert(functionCall)) {
+          return pageCreatorAgentHandle(chatMessages, functionCall)
+        }
+        return functionCallHandler(chatMessages, functionCall)
+      }
     })
   return (
     <>

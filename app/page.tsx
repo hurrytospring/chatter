@@ -3,7 +3,7 @@
 import { nanoid } from '@/lib/utils'
 import { Chat } from '@/components/chat'
 import { Message } from 'ai'
-import plugin_prompt from '@/prompt/base_open_plugin.md'
+import plugin_prompt from '@/prompt/base_main.md'
 import { useEffect, useState } from 'react'
 import  CircularProgress from '@mui/material/CircularProgress';
 import { bitable } from '@lark-base-open/js-sdk'
@@ -31,7 +31,7 @@ export default function IndexPage() {
     },
     {
       id: nanoid(),
-      content:`当前表结构为：${initCtx}, 其中含有用户字段名，id等信息，你在生成代码时，可以结合用户输入从其中直接获取一些值，作为常量使用` ,
+      content:`当前表结构为：${initCtx}, 其中含有用户字段名，id等信息，请你根据它推测用户的需求，并给出更具体的任务描述` ,
       role: 'system'
     }
   ]
