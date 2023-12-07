@@ -36,10 +36,13 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const chat = await getChat(params.id, session.user.id)
 
   if (!chat) {
+    console.log(1111,chat)
     notFound()
   }
 
   if (chat?.userId !== session?.user?.id) {
+    console.log(222222)
+
     notFound()
   }
 

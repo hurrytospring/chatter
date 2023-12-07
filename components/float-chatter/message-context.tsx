@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { BehaviorSubject } from 'rxjs'
+import React, { ReactChildren, ReactElement, createContext, useContext, useEffect, useState } from 'react'
+import { CardMessageType } from './types'
 
-interface CardMessage {
+export interface CardMessage {
   id: string
   time: number
-  type: string
+  type: CardMessageType
   sender: string
   content: any
   status: 'pending' | 'done'
@@ -33,7 +33,7 @@ export const useCardMessageContext = () => {
   return context
 }
 
-export const CardMessageProvider: React.FC = ({ children }) => {
+export const CardMessageProvider: React.FC<{children:ReactElement}> = ({ children }) => {
   const [cardList, setCardMessageList] =
     useState<CardMessage[]>(initialCardMessages)
   const operate = (operation: Operation) => {
