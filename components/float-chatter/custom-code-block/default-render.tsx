@@ -1,7 +1,7 @@
 import { runCodeSync } from '@/app/code_runner'
 import * as MUI from '@mui/material'
 import React, { FunctionComponent } from 'react'
-import { CardMessage } from '../message-context'
+import { CardMessage } from '../types'
 
 interface IDefaultRenderProps {
   card: CardMessage

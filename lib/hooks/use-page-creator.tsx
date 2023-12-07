@@ -1,16 +1,18 @@
 import { ChatRequest, FunctionCall, FunctionCallHandler, Message } from 'ai'
 import prompt from '../../prompt/base_page_creator_plugin.md'
-import { nanoid } from '../utils'
+import { nanoid, parseJSON } from '../utils'
 import { FunctionCallHandlerWithAssert } from '../types'
 import { codeRunnerDef } from '../functions'
 import { useChat } from 'ai/react'
 import { BaseAISDK } from '../base-ai-sdk/base-ai-sdk'
 import { useRef, useState } from 'react'
+import { Operator } from '@/components/float-chatter/types'
+import JSON5 from 'json5'
 
 const fnKey = 'create_base_page'
 export const pageCreatorFnDef = {
   name: fnKey,
-  description: '创建web页面，将会返回给你一段代码可以提供给用户来生成页面',
+  description: '创建web页面，返回结果将告诉你创建是否成功',
   parameters: {
     type: 'object',
     properties: {
@@ -23,7 +25,20 @@ export const pageCreatorFnDef = {
     required: ['content']
   }
 }
-
+const dynamicOutputDef = {
+  name: 'gen_page_from_code',
+  description: '执行代码并创建页面，返回结果将告诉你创建是否成功',
+  parameters: {
+    type: 'object',
+    properties: {
+      code: {
+        type: 'string',
+        description: 'javascript code'
+      }
+    },
+    required: ['code']
+  }
+}
 const initialMessages: Message[] = [
   {
     role: 'system',
@@ -31,13 +46,54 @@ const initialMessages: Message[] = [
     id: nanoid()
   }
 ]
-export const usePageCreatorAgent = () => {
-  const lastMsgRef=useRef<Message|null>(null)
-  const { reload, setMessages, append } = useChat({
+export const usePageCreatorAgent = (operate: Operator) => {
+  const lastMsgRef = useRef<Message | null>(null)
+
+  const { reload, setMessages } = useChat({
     api: '/api/chat-common',
-    body: { functions: [codeRunnerDef] },
+    body: {
+      modelConfig: {
+        model: 'gpt-4-1106-preview',
+        functions:[dynamicOutputDef]
+        // tools: [
+        //   {
+        //     function: dynamicOutputDef,
+
+        //     /**
+        //      * The type of the tool. Currently, only `function` is supported.
+        //      */
+        //     type: 'function'
+        //   }
+        // ]
+      }
+    },
     onFinish: (message: Message) => {
-      lastMsgRef.current=message;
+      lastMsgRef.current = message
+    },
+    experimental_onFunctionCall: async (chatMessages, functionCall) => {
+      console.log('gen code:00000', functionCall)
+
+      if (functionCall.name === 'gen_page_from_code') {
+        console.log('gen code:11111', functionCall.arguments)
+
+        // 使用正则表达式替换所有反引号为双引号
+        const args = parseJSON(functionCall.arguments || '{}')
+        try {
+          const code = args.code
+          console.log('gen code:22222', code)
+          operate({
+            type: 'add',
+            data: {
+              id: nanoid(),
+              content: code,
+              type: 'Dynamic'
+            }
+          })
+        } catch (e) {
+          console.log('parse code err:')
+          console.error(e)
+        }
+      }
     }
   })
   const handleCall: FunctionCallHandler = async (
@@ -67,19 +123,24 @@ export const usePageCreatorAgent = () => {
       content: bgPrompt,
       id: nanoid()
     } as const
-    setMessages([...initialMessages, bgMessage,{
-      role: 'user',
-      content: functionCall.arguments || '',
-      id: nanoid()
-    }])
+    setMessages([
+      ...initialMessages,
+      bgMessage,
+      {
+        role: 'user',
+        content: functionCall.arguments || '',
+        id: nanoid()
+      }
+    ])
     await reload()
     console.log(
       `ccccccccall pageCreator agent result:${JSON.stringify(
-        { result:lastMsgRef.current?.content },
+        { result: lastMsgRef.current?.content },
         null,
         2
       )}`
     )
+
     return {
       messages: [
         ...chatMessages,
@@ -88,7 +149,7 @@ export const usePageCreatorAgent = () => {
           name: fnKey,
           role: 'function' as const,
           content: JSON.stringify({
-            result:lastMsgRef.current?.content
+            result: '生成完成'
           })
         }
       ]

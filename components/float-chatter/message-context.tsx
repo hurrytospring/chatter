@@ -1,23 +1,7 @@
 import React, { ReactChildren, ReactElement, createContext, useContext, useEffect, useState } from 'react'
-import { CardMessageType } from './types'
+import { CardMessage, CardMessageType, ContextValue, Operation } from './types'
 
-export interface CardMessage {
-  id: string
-  time: number
-  type: CardMessageType
-  sender: string
-  content: any
-  status: 'pending' | 'done'
-}
-interface Operation {
-  type: 'add' | 'update'
-  data: Partial<CardMessage>
-}
 
-interface ContextValue {
-  cards: CardMessage[]
-  operate: (op: Operation) => void
-}
 
 const initialCardMessages: CardMessage[] = [] // 初始卡片列表为空
 
@@ -36,6 +20,7 @@ export const useCardMessageContext = () => {
 export const CardMessageProvider: React.FC<{children:ReactElement}> = ({ children }) => {
   const [cardList, setCardMessageList] =
     useState<CardMessage[]>(initialCardMessages)
+    console.log(88888,cardList)
   const operate = (operation: Operation) => {
     setCardMessageList(list => {
       if (operation.type === 'update') {
@@ -48,6 +33,7 @@ export const CardMessageProvider: React.FC<{children:ReactElement}> = ({ childre
         return updatedCardMessages
       }
       if (operation.type === 'add') {
+        console.log(77777,[...list, operation.data])
         return [...list, operation.data]
       }
       return list

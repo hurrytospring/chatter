@@ -32,7 +32,8 @@ const genStaticSyncCode = (userCode: string, keys: string[]) => {
   const code = trim(userCode, ';')
   return `
    function syncOperation(${keys.join(',')}) {
-   return  (function (){${code}})()
+   const comp=React.createElement((function (){${code}})());
+   return comp;  
   }
   return syncOperation(${keys.join(
     ','

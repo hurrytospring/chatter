@@ -25,8 +25,15 @@ import { ChatRequest, FunctionCallHandler, nanoid } from 'ai'
 import { runCode } from '@/app/code_runner'
 import { FieldType, bitable } from '@lark-base-open/js-sdk'
 import lodash from 'lodash'
+import {
+  pageCreatorFnDef,
+  usePageCreatorAgent
+} from '@/lib/hooks/use-page-creator'
+import {
+  CardMessageProvider,
+  useCardMessageContext
+} from './float-chatter/message-context'
 import { FloatChatter } from './float-chatter/float-chatter'
-import { CardMessageProvider } from './float-chatter/message-context'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 export interface ChatProps extends React.ComponentProps<'div'> {
@@ -77,14 +84,17 @@ function ChatPure({ id, initialMessages, className }: ChatProps) {
   )
   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
-
+  const { operate } = useCardMessageContext()
+  const pageCreatorAgentHandle = usePageCreatorAgent(operate)
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
+      api: '/api/chat-common',
       initialMessages,
       id,
       body: {
         id,
-        previewToken
+        previewToken,
+        modelConfig: { functions: [pageCreatorFnDef] }
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -92,12 +102,18 @@ function ChatPure({ id, initialMessages, className }: ChatProps) {
         }
       },
       onFinish() {
-        if (!path.includes('chat')) {
-          router.push(`/chat/${id}`, { shallow: true })
-          router.refresh()
-        }
+        // if (!path.includes('chat')) {
+        //   router.push(`/chat/${id}`, { shallow: true })
+        //   router.refresh()
+        // }
       },
-      experimental_onFunctionCall: functionCallHandler
+      experimental_onFunctionCall: (chatMessages, functionCall) => {
+        console.log('calledddddd,', functionCall)
+        if (pageCreatorAgentHandle.assert(functionCall)) {
+          return pageCreatorAgentHandle(chatMessages, functionCall)
+        }
+        return functionCallHandler(chatMessages, functionCall)
+      }
     })
   return (
     <>
@@ -164,10 +180,10 @@ function ChatPure({ id, initialMessages, className }: ChatProps) {
 export function Chat(props: ChatProps) {
   return (
     <CardMessageProvider>
-      <>
-        <ChatPure {...props}></ChatPure> 
+      <div className="chatter-wrapper">
+        <ChatPure {...props}></ChatPure>
         <FloatChatter />
-      </>
+      </div>
     </CardMessageProvider>
   )
 }

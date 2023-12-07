@@ -1,3 +1,5 @@
+'use client'
+
 import { FieldType, ITable, bitable } from '@lark-base-open/js-sdk'
 
 export class BaseAISDK {
@@ -38,3 +40,4 @@ export class BaseAISDK {
     return Promise.all(fieldList.map(f => f.getCellString(recId)))
   }
 }
+global.window.BaseAISDK=BaseAISDK;
