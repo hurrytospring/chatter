@@ -35,6 +35,7 @@ import {
 } from '../float-chatter/message-context'
 import { FloatChatter } from '../float-chatter/float-chatter'
 import { ChatProps } from './types'
+import { sysFnDef, useSysAgent } from '@/lib/hooks/use-sys-agent'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 
@@ -84,6 +85,7 @@ export function ChatPure({ id, initialMessages, className }: ChatProps) {
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
   const { operate } = useCardMessageContext()
   const pageCreatorAgentHandle = usePageCreatorAgent(operate)
+  const sysAgentHandle = useSysAgent(operate)//test
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
       api: '/api/chat-common',
@@ -92,7 +94,7 @@ export function ChatPure({ id, initialMessages, className }: ChatProps) {
       body: {
         id,
         previewToken,
-        modelConfig: { functions: [pageCreatorFnDef] }
+        modelConfig: { functions: [pageCreatorFnDef,sysFnDef] }
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -109,6 +111,8 @@ export function ChatPure({ id, initialMessages, className }: ChatProps) {
         console.log('calledddddd,', functionCall)
         if (pageCreatorAgentHandle.assert(functionCall)) {
           return pageCreatorAgentHandle(chatMessages, functionCall)
+        }else if(sysAgentHandle.assert(functionCall)){
+          return sysAgentHandle(chatMessages,functionCall)
         }
         return functionCallHandler(chatMessages, functionCall)
       }

@@ -8,7 +8,9 @@ const genStaticCode = (userCode: string, keys: string[]) => {
   return `
   async function asyncOperation(${keys.join(',')}) {
     // 异步操作
-   return await (${code})
+   return new Promise(async ()=>{
+    ${code}
+   })
   }
   // 执行异步操作
   return new Promise((res,rej)=>{
