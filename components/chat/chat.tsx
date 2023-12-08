@@ -17,8 +17,8 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { useState } from 'react'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 import { toast } from 'react-hot-toast'
 import { usePathname, useRouter } from 'next/navigation'
 import { ChatRequest, FunctionCallHandler, nanoid } from 'ai'
@@ -32,14 +32,12 @@ import {
 import {
   CardMessageProvider,
   useCardMessageContext
-} from './float-chatter/message-context'
-import { FloatChatter } from './float-chatter/float-chatter'
+} from '../float-chatter/message-context'
+import { FloatChatter } from '../float-chatter/float-chatter'
+import { ChatProps } from './types'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
-export interface ChatProps extends React.ComponentProps<'div'> {
-  initialMessages?: Message[]
-  id?: string
-}
+
 const functionCallHandler: FunctionCallHandler = async (
   chatMessages,
   functionCall
@@ -75,7 +73,7 @@ const functionCallHandler: FunctionCallHandler = async (
     return functionResponse
   }
 }
-function ChatPure({ id, initialMessages, className }: ChatProps) {
+export function ChatPure({ id, initialMessages, className }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
@@ -177,13 +175,4 @@ function ChatPure({ id, initialMessages, className }: ChatProps) {
   )
 }
 
-export function Chat(props: ChatProps) {
-  return (
-    <CardMessageProvider>
-      <div className="chatter-wrapper">
-        <ChatPure {...props}></ChatPure>
-        <FloatChatter />
-      </div>
-    </CardMessageProvider>
-  )
-}
+

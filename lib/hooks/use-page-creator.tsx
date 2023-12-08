@@ -25,6 +25,7 @@ export const pageCreatorFnDef = {
     required: ['content']
   }
 }
+// 子agent自己用的function call
 const dynamicOutputDef = {
   name: 'gen_page_from_code',
   description: '执行代码并创建页面，返回结果将告诉你创建是否成功',
@@ -53,7 +54,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
     api: '/api/chat-common',
     body: {
       modelConfig: {
-        model: 'gpt-4-1106-preview',
+        model: 'gpt-3.5-turbo-1106',
         functions:[dynamicOutputDef]
         // tools: [
         //   {
@@ -96,6 +97,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
       }
     }
   })
+  // 父agent调用子agent的函数
   const handleCall: FunctionCallHandler = async (
     chatMessages,
     functionCall
@@ -113,7 +115,6 @@ export const usePageCreatorAgent = (operate: Operator) => {
     const curDetailData = await BaseAISDK.getCurDetailData()
     const curListData = await BaseAISDK.getCurListData()
     const bgPrompt = `
-      当前的列表数据示例为: ${JSON.stringify(curListData, null, 2)}，
       当前的详情数据示例为: ${JSON.stringify(curDetailData, null, 2)}
       请你结合这些数据的含义，判断应该强调的信息，以创建不同样式的页面
     `
@@ -124,8 +125,8 @@ export const usePageCreatorAgent = (operate: Operator) => {
       id: nanoid()
     } as const
     setMessages([
-      ...initialMessages,
       bgMessage,
+      ...initialMessages,
       {
         role: 'user',
         content: functionCall.arguments || '',

@@ -29,6 +29,6 @@ BaseAISDK.getCurDetailData(): Promise<{
     row: string[];
 }>
 ```
-
 # Note: 必须通过 function calling 调用工具
+# Note: 最后一行必须含有return 语句，必须return一个react组件
 
