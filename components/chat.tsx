@@ -26,7 +26,7 @@ import { runCode } from '@/app/code_runner'
 import { FieldType, bitable } from '@lark-base-open/js-sdk'
 import lodash from 'lodash'
 
-const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
+const IS_PREVIEW = process.env.NEXT_PUBLIC_IN_PREVIEW_MODE === 'true'
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: Message[]
   id?: string
@@ -74,6 +74,7 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
     null
   )
   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
+  console.log(9999,IS_PREVIEW)
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
 
   const { messages, append, reload, stop, isLoading, input, setInput } =
