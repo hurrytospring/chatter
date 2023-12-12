@@ -5,10 +5,11 @@ import { ChatMessage } from '@/components/chat-message'
 import clsx from 'clsx'
 
 export interface ChatList {
-  messages: Message[]
-}
+  messages: Message[],
+  hiddenMessageNum:number//隐藏信息数量
+ }
 
-export function ChatList({ messages }: ChatList) {
+export function ChatList({ messages,hiddenMessageNum }: ChatList) {
   if (!messages.length) {
     return null
   }
@@ -19,7 +20,7 @@ export function ChatList({ messages }: ChatList) {
         <div
           key={index}
           className={clsx({
-            hidden: index === 0
+            hidden: index <= hiddenMessageNum-1
           })}
         >
           <ChatMessage message={message} />

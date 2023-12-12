@@ -32,21 +32,41 @@ export async function runCode(userCode: string, ctx: Record<string, any>) {
 // 定义动态代码字符串,同步
 const genStaticSyncCode = (userCode: string, keys: string[]) => {
   const code = trim(userCode, ';')
+  
   return `
    function syncOperation(${keys.join(',')}) {
-   const comp=React.createElement((function (){${code}})());
+    ${code}
+   const comp=React.createElement(Comp);
    return comp;  
   }
   return syncOperation(${keys.join(
     ','
   )})
 `
+
+//   return `
+//    function syncOperation(${keys.join(',')}) {
+//    const comp=React.createElement((function (){${code}})());
+//    return comp;  
+//   }
+//   return syncOperation(${keys.join(
+//     ','
+//   )})
+// `
 }
 export function runCodeSync(userCode: string, ctx: Record<string, any>) {
   const keys = Object.keys(ctx)
   const code = genStaticSyncCode(userCode, keys)
-  console.log(1111,code)
+  console.log(new String(code).toString())
   const dynamicFunction = new Function(...keys, code)
   console.log('ctxxxxx',keys.map(key => ctx[key]))
-  return  dynamicFunction(...keys.map(key => ctx[key]))
+  try{//错误处理
+    const result = dynamicFunction(...keys.map(key => ctx[key]))
+    console.log("runCodeResult",result)
+    return  result
+  }catch(e){
+    //TODO：增加更多的错误处理逻辑
+    console.log("runCodeErr",e)
+  }
 }
+

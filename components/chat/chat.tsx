@@ -74,7 +74,7 @@ const functionCallHandler: FunctionCallHandler = async (
     return functionResponse
   }
 }
-export function ChatPure({ id, initialMessages, className }: ChatProps) {
+export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
@@ -84,8 +84,10 @@ export function ChatPure({ id, initialMessages, className }: ChatProps) {
   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
   const { operate } = useCardMessageContext()
-  const pageCreatorAgentHandle = usePageCreatorAgent(operate)
-  const sysAgentHandle = useSysAgent(operate)//test
+  const pageCreatorAgentHandle = usePageCreatorAgent(operate,setPageStatus)
+  const sysAgentHandle = useSysAgent(operate)
+  //注意默认隐藏初始信息
+  const iniMessageNum = initialMessages?.length || 0
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
       api: '/api/chat-common',
@@ -117,12 +119,13 @@ export function ChatPure({ id, initialMessages, className }: ChatProps) {
         return functionCallHandler(chatMessages, functionCall)
       }
     })
+
   return (
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
         {messages.length ? (
           <>
-            <ChatList messages={messages} />
+            <ChatList messages={messages} hiddenMessageNum = {iniMessageNum}/>
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (

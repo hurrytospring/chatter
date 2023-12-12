@@ -47,7 +47,7 @@ const initialMessages: Message[] = [
     id: nanoid()
   }
 ]
-export const usePageCreatorAgent = (operate: Operator) => {
+export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:string)=>void) => {
   const lastMsgRef = useRef<Message | null>(null)
 
   const { reload, setMessages } = useChat({
@@ -73,7 +73,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
     },
     experimental_onFunctionCall: async (chatMessages, functionCall) => {
       console.log('gen code:00000', functionCall)
-
+      
       if (functionCall.name === 'gen_page_from_code') {
         console.log('gen code:11111', functionCall.arguments)
 
@@ -82,6 +82,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
         try {
           const code = args.code
           console.log('gen code:22222', code)
+          setPageStatus("loaded")
           operate({
             type: 'add',
             data: {
@@ -112,11 +113,18 @@ export const usePageCreatorAgent = (operate: Operator) => {
         2
       )}`
     )
+    setPageStatus("loading")
     const curDetailData = await BaseAISDK.getCurDetailData()
     const curListData = await BaseAISDK.getCurListData()
+    //TODO:调整prompt使得生成页面更加美观， 且能适应各种页面
+    //TODO:优化流程， 使得其更快
+    // const bgPrompt = `
+    //   当前的详情数据示例为: ${JSON.stringify(curDetailData, null, 2)}
+    //   请你结合这些数据的含义，判断应该强调的信息，以创建不同样式的页面
+    // `
     const bgPrompt = `
-      当前的详情数据示例为: ${JSON.stringify(curDetailData, null, 2)}
-      请你结合这些数据的含义，判断应该强调的信息，以创建不同样式的页面
+        请调用sdk获取数据，创建各类界面
+        创建详情页面时，以表名为大标题，置于页面顶端，字段以 “字段名 字段值”为一行，纵向排列
     `
     console.log(`ccccccccall pageCreator agent--in-progress: ${bgPrompt}`)
     const bgMessage = {

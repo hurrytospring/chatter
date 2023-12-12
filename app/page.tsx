@@ -36,5 +36,6 @@ export default function IndexPage() {
     }
   ]
   if (loading) return <CircularProgress />
-  return <Chat id={id} initialMessages={message} />
+  //TODO:用更好的方式处理这里的type相关
+  return <Chat id={id} initialMessages={message} setPageStatus={()=>{}}/>
 }
