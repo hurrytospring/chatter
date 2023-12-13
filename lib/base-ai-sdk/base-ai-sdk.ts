@@ -1,10 +1,6 @@
 'use client'
 
-<<<<<<< HEAD
 import {FieldType, IRecordValue, ITable, bitable} from '@lark-base-open/js-sdk'
-=======
-import { FieldType, ITable, bitable } from '@lark-base-open/js-sdk'
->>>>>>> 59f0f6e742a2804164ad438ded421428e07454f5
 
 export class BaseAISDK {
   static async getCurListData() {
@@ -43,7 +39,6 @@ export class BaseAISDK {
     const fieldList = await table.getFieldList()
     return Promise.all(fieldList.map(f => f.getCellString(recId)))
   }
-<<<<<<< HEAD
   static async getTable(){
     const table = await bitable.base.getActiveTable();
     return table
@@ -202,7 +197,5 @@ export class BaseAISDK {
 
     }
   }
-=======
->>>>>>> 59f0f6e742a2804164ad438ded421428e07454f5
 }
 global.window.BaseAISDK=BaseAISDK;

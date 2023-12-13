@@ -39,45 +39,6 @@ import { sysFnDef, useSysAgent } from '@/lib/hooks/use-sys-agent'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 
-<<<<<<< HEAD
-
-=======
-const functionCallHandler: FunctionCallHandler = async (
-  chatMessages,
-  functionCall
-) => {
-  console.log('start callllllllll', functionCall)
-  if (functionCall.name === 'run_javascript_code') {
-    const code = JSON.parse(functionCall.arguments || `{}`).code || ''
-    console.log('start callllllllll code', code)
-
-    let result: any = ''
-    if (code) {
-      try {
-        result = await runCode(code, { bitable, FieldType, lodash })
-      } catch (e) {
-        result = { error: e }
-      }
-    }
-    console.log('end callllllllll', result)
-
-    const functionResponse: ChatRequest = {
-      messages: [
-        ...chatMessages,
-        {
-          id: nanoid(),
-          name: 'run_javascript_code',
-          role: 'function' as const,
-          content: JSON.stringify({
-            result
-          })
-        }
-      ]
-    }
-    return functionResponse
-  }
-}
->>>>>>> 59f0f6e742a2804164ad438ded421428e07454f5
 export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
@@ -114,21 +75,13 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
         // }
       },
       experimental_onFunctionCall: (chatMessages, functionCall) => {
-<<<<<<< HEAD
         console.log('————————calling function————————,', functionCall)
-=======
-        console.log('calledddddd,', functionCall)
->>>>>>> 59f0f6e742a2804164ad438ded421428e07454f5
         if (pageCreatorAgentHandle.assert(functionCall)) {
           return pageCreatorAgentHandle(chatMessages, functionCall)
         }else if(sysAgentHandle.assert(functionCall)){
           return sysAgentHandle(chatMessages,functionCall)
         }
-<<<<<<< HEAD
         return
-=======
-        return functionCallHandler(chatMessages, functionCall)
->>>>>>> 59f0f6e742a2804164ad438ded421428e07454f5
       }
     })
 
