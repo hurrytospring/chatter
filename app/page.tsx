@@ -7,11 +7,15 @@ import plugin_prompt from '@/prompt/base_main.md'
 import { useEffect, useState } from 'react'
 import  CircularProgress from '@mui/material/CircularProgress';
 import { bitable } from '@lark-base-open/js-sdk'
+import { BaseAISDK } from '@/lib/base-ai-sdk/base-ai-sdk'
 
 async function getInitPrompt() {
   const table = await bitable.base.getActiveTable()
   const metaList = await table.getFieldMetaList()
-  return  JSON.stringify(metaList);
+  const newList = metaList.map(obj=>{return  {id:obj.id,name:obj.name}})
+  console.log("data",await BaseAISDK.getCurListData())
+  // console.log("data",data)
+  return  JSON.stringify(newList);
 }
 export default function IndexPage() {
   const id = nanoid()

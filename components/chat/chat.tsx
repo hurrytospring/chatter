@@ -36,6 +36,8 @@ import {
 import { FloatChatter } from '../float-chatter/float-chatter'
 import { ChatProps } from './types'
 import { sysFnDef, useSysAgent } from '@/lib/hooks/use-sys-agent'
+import { useUniAgent } from '@/lib/hooks/use-uni-agent'
+import { dataAnasisAgentConfig } from '@/lib/hooks/use-data-anasis'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 
@@ -86,6 +88,7 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
   const { operate } = useCardMessageContext()
   const pageCreatorAgentHandle = usePageCreatorAgent(operate,setPageStatus)
   const sysAgentHandle = useSysAgent(operate)
+  const dataAnasisAgentHandle = useUniAgent(dataAnasisAgentConfig)
   //注意默认隐藏初始信息
   const iniMessageNum = initialMessages?.length || 0
   const { messages, append, reload, stop, isLoading, input, setInput } =
@@ -96,7 +99,7 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
       body: {
         id,
         previewToken,
-        modelConfig: { functions: [pageCreatorFnDef,sysFnDef] }
+        modelConfig: { functions: [pageCreatorFnDef,sysFnDef,dataAnasisAgentConfig.outFnDef] }
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -115,6 +118,8 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
           return pageCreatorAgentHandle(chatMessages, functionCall)
         }else if(sysAgentHandle.assert(functionCall)){
           return sysAgentHandle(chatMessages,functionCall)
+        }else if(dataAnasisAgentHandle.assert(functionCall)){
+          return dataAnasisAgentHandle(chatMessages,functionCall)
         }
         return functionCallHandler(chatMessages, functionCall)
       }

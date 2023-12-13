@@ -117,7 +117,7 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
     const curDetailData = await BaseAISDK.getCurDetailData()
     const curListData = await BaseAISDK.getCurListData()
     //TODO:调整prompt使得生成页面更加美观， 且能适应各种页面
-    //TODO:优化流程， 使得其更快
+    //TODO:优化
     // const bgPrompt = `
     //   当前的详情数据示例为: ${JSON.stringify(curDetailData, null, 2)}
     //   请你结合这些数据的含义，判断应该强调的信息，以创建不同样式的页面

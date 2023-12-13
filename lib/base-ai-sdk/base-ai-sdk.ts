@@ -1,6 +1,13 @@
 'use client'
 
-import { FieldType, ITable, bitable } from '@lark-base-open/js-sdk'
+import {
+  FieldType,
+  IAttachmentField,
+  IMultiSelectField,
+  INumberField,
+  ITable,
+  bitable
+} from '@lark-base-open/js-sdk'
 
 export class BaseAISDK {
   static async getCurListData() {
@@ -9,7 +16,7 @@ export class BaseAISDK {
     const fieldList = await table.getFieldList()
     const recordValue = await Promise.all(
       recIds.map(recId => {
-        return BaseAISDK.getRecCellStr(recId, table)
+        return BaseAISDK.getRecCellContent(recId, table)
       })
     )
     const metaList = await table.getFieldMetaList()
@@ -39,5 +46,30 @@ export class BaseAISDK {
     const fieldList = await table.getFieldList()
     return Promise.all(fieldList.map(f => f.getCellString(recId)))
   }
+  static async getRecCellContent(recId: string, table: ITable) {
+    const fieldList = await table.getFieldList()
+    return Promise.all(
+      fieldList?.map(async f => {
+        const type = await f.getType()
+        //对附件 ，多选， 数字的值进行特化
+        switch (type) {
+          case FieldType.Attachment:
+            const attachmentField = await table.getField<IAttachmentField>(f.id);
+            try{
+              //注意此处没有附件时会报错 
+              return await attachmentField.getAttachmentUrls(recId)
+            }catch(e){
+              return ""
+            }
+          case FieldType.Number:
+            return await (f as INumberField).getValue(recId)
+          case FieldType.MultiSelect:
+            return await (f as IMultiSelectField).getValue(recId)
+          default:
+            return await f.getCellString(recId)
+        }
+      })
+    )
+  }
 }
-global.window.BaseAISDK=BaseAISDK;
+// global.window.BaseAISDK = BaseAISDK
