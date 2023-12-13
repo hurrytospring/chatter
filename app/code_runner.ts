@@ -8,15 +8,14 @@ const genStaticCode = (userCode: string, keys: string[]) => {
   return `
   async function asyncOperation(${keys.join(',')}) {
     // 异步操作
-   return new Promise(async ()=>{
-    ${code}
-   })
+   return await (async ()=>{
+    return (${code})
+   })()
   }
   // 执行异步操作
   return new Promise((res,rej)=>{
-    asyncOperation(${keys.join(
-      ','
-    )}).then(value=>{console.log('rrrrrr',value);res(value)}).catch(e=>{console.log('eeeeeeee',e);rej(e)})
+    asyncOperation(${keys.join(',')})
+    .then(value=>{console.log('rrrrrr',value);res(value)}).catch(e=>{console.log('eeeeeeee',e);rej(e)})
   }) 
 `
 }
@@ -24,6 +23,10 @@ const genStaticCode = (userCode: string, keys: string[]) => {
 export async function runCode(userCode: string, ctx: Record<string, any>) {
   const keys = Object.keys(ctx)
   const code = genStaticCode(userCode, keys)
+  console.log("--------------code--------------")
+  console.log(code)
+  console.log("--------------keys----------------")
+  console.log(keys)
   const dynamicFunction = new Function(...keys, code)
   return await dynamicFunction(...keys.map(key => ctx[key]))
 }

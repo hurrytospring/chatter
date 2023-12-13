@@ -41,41 +41,6 @@ import { dataAnasisAgentConfig } from '@/lib/hooks/use-data-anasis'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 
-const functionCallHandler: FunctionCallHandler = async (
-  chatMessages,
-  functionCall
-) => {
-  console.log('start callllllllll', functionCall)
-  if (functionCall.name === 'run_javascript_code') {
-    const code = JSON.parse(functionCall.arguments || `{}`).code || ''
-    console.log('start callllllllll code', code)
-
-    let result: any = ''
-    if (code) {
-      try {
-        result = await runCode(code, { bitable, FieldType, lodash })
-      } catch (e) {
-        result = { error: e }
-      }
-    }
-    console.log('end callllllllll', result)
-
-    const functionResponse: ChatRequest = {
-      messages: [
-        ...chatMessages,
-        {
-          id: nanoid(),
-          name: 'run_javascript_code',
-          role: 'function' as const,
-          content: JSON.stringify({
-            result
-          })
-        }
-      ]
-    }
-    return functionResponse
-  }
-}
 export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
@@ -113,7 +78,7 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
         // }
       },
       experimental_onFunctionCall: (chatMessages, functionCall) => {
-        console.log('calledddddd,', functionCall)
+        console.log('————————calling function————————,', functionCall)
         if (pageCreatorAgentHandle.assert(functionCall)) {
           return pageCreatorAgentHandle(chatMessages, functionCall)
         }else if(sysAgentHandle.assert(functionCall)){
@@ -121,7 +86,7 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
         }else if(dataAnasisAgentHandle.assert(functionCall)){
           return dataAnasisAgentHandle(chatMessages,functionCall)
         }
-        return functionCallHandler(chatMessages, functionCall)
+        return
       }
     })
 

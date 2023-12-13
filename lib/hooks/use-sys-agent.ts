@@ -1,5 +1,5 @@
 import { ChatRequest, FunctionCall, FunctionCallHandler, Message } from 'ai'
-import prompt from '../../prompt/base_open_plugin.md'
+import prompt from '../../prompt/newPrompt.md'
 import { useChat } from 'ai/react/dist'
 import { nanoid, parseJSON } from '../utils'
 import { FunctionCallHandlerWithAssert } from '../types'
@@ -40,20 +40,22 @@ export const useSysAgent = (operate: Operator) => {
     api: '/api/chat-common',
     body: {
       modelConfig: {
-        model: 'gpt-3.5-turbo-1106',
+        model: 'gpt-4-1106-preview',
         functions: [codeGeneratorDef]
       }
     },
+
+
     experimental_onFunctionCall: async (chatMessages, functionCall) => {
-      console.log('sys Call!', functionCall)
-      let result:string = ""
+      console.log('————————sysAgent receiverd Call!————————\n', functionCall)
+      let result: string = ""
       try {
-        //注意functionCal返回的code参数可能不符合json格式
-        const code:string = JSON.parse(functionCall.arguments || `{}`).code || ''
-        console.log('sys call code\n', code)
+        //注意functionCall返回的code参数可能不符合json格式
+        const code: string = JSON.parse(functionCall.arguments || `{}`).code || ''
+        console.log('————————sysAgent generated code————————\n', code)
         //执行代码
-        //TODO：注意此处生成的代码逻辑仍有明显问题
-        result = await runCode(code, { bitable, FieldType,lodash })
+        result = await runCode(code, { BaseAISDK })
+        console.log("____result____\n", result)
       } catch (e) {
         result = "生成失败"
         console.log('err', e)
@@ -66,24 +68,27 @@ export const useSysAgent = (operate: Operator) => {
             id: nanoid(),
             name: 'run_javascript_code',
             role: 'function' as const,
-            content: JSON.stringify({
-              result
-            })
+            // content: JSON.stringify({
+            //   result
+            // })
+            content: result
           }
         ]
       }
       return functionResponse
     }
   })
-  const handleCall: FunctionCallHandler = async (
-    chatMessages,
-    functionCall
-  ) => {
-    console.log('call sysAgent', functionCall)
+
+
+  const handleCall: FunctionCallHandler = async (chatMessages,functionCall) => {
+    console.log('————————sysAgent is called———————\n', functionCall)
+
     const bgPrompt = `
-      请你结合之前的告知的sdk内容和操作，生成一段javascript代码，达成用户需要进行的操作,注意code参数必须是json形式
+      请你结合之前告知的BaseAISDK中的内容和操作，以及用户的需求，生成一段javascript代码，达成用户需要进行的操作。
     `
-    console.log('sysAgent in progress', bgPrompt)
+
+    console.log('————————sysAgent in progress————————\n', bgPrompt)
+
     const bgMessage = {
       role: 'system',
       content: bgPrompt,
@@ -93,10 +98,18 @@ export const useSysAgent = (operate: Operator) => {
     setMessages([
       bgMessage,
       ...initialMessages,
-      { role: 'user', content: functionCall.arguments?.[0] || '', id: nanoid() }
+      { role: 'user', content: functionCall.arguments || '', id: nanoid() }
     ])
 
+
+    console.log('————————new messages sysAgent got————————\n', JSON.stringify([
+      bgMessage,
+      { role: 'user', content: functionCall.arguments || '', id: nanoid() }
+    ], null, 2))
+
     await reload()
+
+
     return {
       messages: [
         ...chatMessages,
@@ -104,14 +117,11 @@ export const useSysAgent = (operate: Operator) => {
           id: nanoid(),
           name: fnKey,
           role: 'function' as const,
-          content: JSON.stringify({
-            result: '生成完成',
-          })
+          content: '表格部分完成，如有剩余流程会继续执行下一步操作。',
         }
       ]
     } as ChatRequest
-  }
-  ;(handleCall as FunctionCallHandlerWithAssert).assert = (fn: FunctionCall) =>
-    fn.name === fnKey
+  }; 
+  (handleCall as FunctionCallHandlerWithAssert).assert = (fn: FunctionCall) =>fn.name === fnKey
   return handleCall as FunctionCallHandlerWithAssert
 }
