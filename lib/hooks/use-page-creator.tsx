@@ -54,7 +54,7 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
     api: '/api/chat-common',
     body: {
       modelConfig: {
-        model: 'gpt-3.5-turbo-1106',
+        model: 'gpt-4-1106-preview',
         functions:[dynamicOutputDef]
         // tools: [
         //   {

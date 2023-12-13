@@ -34,11 +34,9 @@ export async function runCode(userCode: string, ctx: Record<string, any>) {
 // 定义动态代码字符串,同步
 const genStaticSyncCode = (userCode: string, keys: string[]) => {
   const code = trim(userCode, ';')
-
   return `
    function syncOperation(${keys.join(',')}) {
-    ${code}
-   const comp=React.createElement(Comp);
+   const comp=React.createElement((function (){${code}})());
    return comp;  
   }
   return syncOperation(${keys.join(',')})
