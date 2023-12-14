@@ -229,5 +229,105 @@ export class BaseAISDK {
 
     }
   }
+
+  static async addDashboard(){     
+    const blockService = await getDashboardBlockService(bitableStore);
+    const blockManager = blockService?.getBlockManager();
+
+    //todo:blockManager ！断言
+    const resp = await blockManager!.modelManager.createToken(params.type, getCirculationInfo(params.type), {});
+    const { token } = resp;
+    this.updateShowTempItem(false);
+
+    const ret = await operate.baseOperate.addBlock({
+      token,
+      type: BlockType.DASHBOARD,
+    });
+    return ret;
+    }
+  
+  
+  static async addChart(DashBoardId: string, chartName: string, type: DetailChart, commonDataCondition: ICommonDataCondition){
+        dashBoard = await getDashBoardById(DashBoardId)
+        dashBoard.addchart(chartName,type,commonDataCondition)
+
+    }
 }
+
+  
+export interface Series {
+  fieldId: string;
+  rollup: Rollup;
+}
+
+ export enum GroupMode {
+  ENUMERATED = 'enumerated', // 拆分统计，“A,B,C” -> A | B | C
+  INTEGRATED = 'integrated', // 不拆分统计，“A,B,C” -> “A,B,C”
+}
+
+export enum Rollup {
+  SUM = 'SUM',
+  AVERAGE = 'AVERAGE',
+  COUNTA = 'COUNTA',
+  MAX = 'MAX',
+  MIN = 'MIN',
+}
+
+export interface ISort {
+  order?: ORDER_ENUM;
+  sortType: DATA_SOURCE_SORT_TYPE;
+}
+
+ interface ICommonDataCondition{
+  tableId: string;
+
+  /**
+   * 分组依据
+   *
+   * 指定二维表的首列、首行结构
+   * 指定 group[0] 的列 id，会作为二维表的首列
+   * 指定 group[1] 的列 id，会作为二维表的首行
+   *
+   * 目前这个能力用于 Chart 和 Stat. 注意：指定两个分组时，只能有一个 SeriesArray
+   */
+   // 字段为多选时，拆分统计 ，GroupMode='enumerated'
+  group?: (string | IGroupItem)[];
+
+  /**
+   * 指定要作为二维表的列
+   * 可以指定 seriesArray[n].fieldId 作为每一个列的内容，并且可以指定统计方式
+   * Max, min, average, sum, counta 等 (原值待支持)
+   *
+   * "COUNTA" 是一个特殊需求，业务可以要求第三方数据源返回满足筛选条件的【个数】
+   * 或者说每个【分组】里面的个数
+   */
+  seriesArray: Series[] | 'COUNTA';
+  
+  
+  // ------ 配置默认值
+    /**
+   * 数据源筛选条件
+   * 按照约定，view 和 viewId 同时存在
+   * Custom 和自定义的 filterInfo 同时存在
+   */
+   //默认值  {SourceType:'ALL'}
+  source: CommonDataConditionItemSource;
+  
+    /**
+   * 值排序规则
+   *
+   * 按照二维数据表生成的数据进行排序， 可以选择正序还是逆序，暂时是为了图表按照y值排序提供的。
+   * 如果是多个系列，则按照第一个系列排，两值相等的话，进行下一个数据比较，以此类推
+   */
+   // 默认值 { order?: ORDER_ENUM.ASCENDING,sortType: DATA_SOURCE_SORT_TYPE.GROUP;}
+  dataSort?: ISort;
+ }
+ //其他配置，
+ interface ISnapshot{
+    overrideViewModel: {
+    // 默认，横轴将数字视为文本
+    cartesian: {  combo: { detail: {} }, indexAxes: { axes: [{ type: 'ordinal' }] } }
+    }
+ }
+
 // global.window.BaseAISDK = BaseAISDK

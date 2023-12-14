@@ -1,5 +1,5 @@
 import { ChatRequest, FunctionCall, FunctionCallHandler, Message } from 'ai'
-import prompt from '../../prompt/newPrompt.md'
+import prompt from '../../prompt/base_system_creator_plugin.md'
 import { useChat } from 'ai/react/dist'
 import { nanoid, parseJSON } from '../utils'
 import { FunctionCallHandlerWithAssert } from '../types'
