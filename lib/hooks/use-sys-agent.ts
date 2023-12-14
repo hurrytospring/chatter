@@ -35,6 +35,8 @@ const initialMessages: Message[] = [
     id: nanoid()
   }
 ]
+
+
 export const useSysAgent = (operate: Operator) => {
   const { reload, setMessages, isLoading } = useChat({
     api: '/api/chat-common',

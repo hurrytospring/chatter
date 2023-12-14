@@ -244,16 +244,92 @@ export class BaseAISDK {
       type: BlockType.DASHBOARD,
     });
     return ret;
-    }
+  }
   
   
   static async addChart(DashBoardId: string, chartName: string, type: DetailChart, commonDataCondition: ICommonDataCondition){
-        dashBoard = await getDashBoardById(DashBoardId)
-        dashBoard.addchart(chartName,type,commonDataCondition)
-
-    }
+    const table = await bitable.base.getTableById(commonDataCondition.tableId)
+    const dashBoard = await table.getDashBoardById(DashBoardId)
+    const chart = dashBoard.addchart(chartName,type,commonDataCondition)
+  }
 }
-
+  
+export declare enum DetailChart {
+  unknown = 0,
+  /**
+   * 基于xy坐标系的图表类型
+   */
+  xy = 1048576,
+  /**
+   * xy的衍生类型：能够进行堆叠的图表类型、
+   * 以及其具体的堆叠子类型（不堆叠、堆叠非百分比、百分比堆叠）；
+   */
+  stackAble = 1048832,
+  noStack = 1049344,
+  stack = 1049856,
+  stackPercentage = 1050880,
+  /**
+   * xy下的线型图表类型
+   * 以及其具体的线型子类型（直线、曲线、阶梯）；
+   */
+  lineLike = 1052672,
+  linear = 1060864,
+  smooth = 1069056,
+  stepped = 1085440,
+  /**
+   * xy下会交换坐标轴的图表类型（比如条形图）
+   */
+  swapAxes = 1114112,
+  //柱状
+  column = 1048833,
+  bar = 1114370,
+  line = 1052932,
+  area = 1052936,
+  //散点图
+  scatter = 1048592,
+  //组合
+  combo = 1052960,
+  /**
+   * 组合图的子类型
+   */
+  dualAxes = 1053024,
+  /** 极坐标 */
+  radial = 1179648,
+  /** 雷达图 */
+  radar = 1441792,
+  /** 普通折线雷达图 */
+  lineRadar = 1441793,
+  /** 带数据标记的雷达图 */
+  linePointRadar = 1441794,
+  /** 填充雷达图 */
+  areaRadar = 1441796,
+  /**
+   * 饼图的类型
+   */
+  pie = 2097152,
+  normalPie = 2097408,
+  donut = 2097664,
+  statistics = 4194304,
+  wordCloud = 8388608,
+  /**
+   * 漏斗图
+   */
+  funnel = 16777216,
+  normalFunnel = 16777472,
+  bilateralFunnel = 16777728,
+  /**
+   * 瀑布图
+   */
+  waterfall = 1572864,
+  /**
+   * 排列图
+   */
+  pareto = 33554432,
+  /**
+   * 气泡图 1 << 26
+   */
+  bubble = 67108864
+}
   
 export interface Series {
   fieldId: string;
@@ -278,7 +354,7 @@ export interface ISort {
   sortType: DATA_SOURCE_SORT_TYPE;
 }
 
- interface ICommonDataCondition{
+export interface ICommonDataCondition{
   tableId: string;
 
   /**
@@ -291,7 +367,7 @@ export interface ISort {
    * 目前这个能力用于 Chart 和 Stat. 注意：指定两个分组时，只能有一个 SeriesArray
    */
    // 字段为多选时，拆分统计 ，GroupMode='enumerated'
-  group?: (string | IGroupItem)[];
+  group: (string | IGroupItem)[];
 
   /**
    * 指定要作为二维表的列
@@ -311,7 +387,7 @@ export interface ISort {
    * Custom 和自定义的 filterInfo 同时存在
    */
    //默认值  {SourceType:'ALL'}
-  source: CommonDataConditionItemSource;
+  source?: CommonDataConditionItemSource;
   
     /**
    * 值排序规则

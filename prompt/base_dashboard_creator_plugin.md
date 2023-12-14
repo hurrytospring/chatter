@@ -14,7 +14,171 @@ const table = await BaseAISDK.getTable();
 示例 
 const dashBoardID = await BaseAISDK.addDashBoard();
 
+### 在新增图表时可能会用到的数据结构： 
+#### DetailChart是一个枚举类型，用来保存图表的每种类型和对应的id   
+```typescript
+export declare enum DetailChart {
+  unknown = 0,
+  /**
+   * 基于xy坐标系的图表类型
+   */
+  xy = 1048576,
+  /**
+   * xy的衍生类型：能够进行堆叠的图表类型、
+   * 以及其具体的堆叠子类型（不堆叠、堆叠非百分比、百分比堆叠）；
+   */
+  stackAble = 1048832,
+  noStack = 1049344,
+  stack = 1049856,
+  stackPercentage = 1050880,
+  /**
+   * xy下的线型图表类型
+   * 以及其具体的线型子类型（直线、曲线、阶梯）；
+   */
+  lineLike = 1052672,
+  linear = 1060864,
+  smooth = 1069056,
+  stepped = 1085440,
+  /**
+   * xy下会交换坐标轴的图表类型（比如条形图）
+   */
+  swapAxes = 1114112,
+  //柱状
+  column = 1048833,
+  bar = 1114370,
+  line = 1052932,
+  area = 1052936,
+  //散点图
+  scatter = 1048592,
+  //组合
+  combo = 1052960,
+  /**
+   * 组合图的子类型
+   */
+  dualAxes = 1053024,
+  /** 极坐标 */
+  radial = 1179648,
+  /** 雷达图 */
+  radar = 1441792,
+  /** 普通折线雷达图 */
+  lineRadar = 1441793,
+  /** 带数据标记的雷达图 */
+  linePointRadar = 1441794,
+  /** 填充雷达图 */
+  areaRadar = 1441796,
+  /**
+   * 饼图的类型
+   */
+  pie = 2097152,
+  normalPie = 2097408,
+  donut = 2097664,
+  statistics = 4194304,
+  wordCloud = 8388608,
+  /**
+   * 漏斗图
+   */
+  funnel = 16777216,
+  normalFunnel = 16777472,
+  bilateralFunnel = 16777728,
+  /**
+   * 瀑布图
+   */
+  waterfall = 1572864,
+  /**
+   * 排列图
+   */
+  pareto = 33554432,
+  /**
+   * 气泡图 1 << 26
+   */
+  bubble = 67108864
+}
+```
+
+#### Rollup是一个枚举类型，用来保存对于数据的几种处理方式：
+```typescript
+export enum Rollup {
+  SUM = 'SUM',// 求和
+  AVERAGE = 'AVERAGE',// 计算均值
+  COUNTA = 'COUNTA',// "COUNTA" 是一个特殊需求，业务可以要求第三方数据源返回满足筛选条件的【个数】或者说每个【分组】里面的个数
+  MAX = 'MAX',// 取最大值
+  MIN = 'MIN',// 取最小值
+}
+```
+
+#### Series接口包括两个参数：
+```typescript
+export interface Series {
+  fieldId: string;
+  rollup: Rollup;
+}
+```
+##### 用来添加数据的字段ID: fieldId: string
+##### 用来定义对数据的处理方式rollup: Rollup
+
+
+
+#### ICommonDataCondition接口中定义了一些图表创建需要的参数，包括： 
+```typescript
+ interface ICommonDataCondition{
+  tableId: string;
+
+  /**
+   * 分组依据
+   *
+   * 指定二维表的首列、首行结构
+   * 指定 group[0] 的列 id，会作为二维表的首列
+   * 指定 group[1] 的列 id，会作为二维表的首行
+   *
+   * 目前这个能力用于 Chart 和 Stat. 注意：指定两个分组时，只能有一个 SeriesArray
+   */
+   // 字段为多选时，拆分统计 ，GroupMode='enumerated'
+  group?: (string | IGroupItem)[];
+
+  /**
+   * 指定要作为二维表的列
+   * 可以指定 seriesArray[n].fieldId 作为每一个列的内容，并且可以指定统计方式
+   * Max, min, average, sum, counta 等 (原值待支持)
+   *
+   * "COUNTA" 是一个特殊需求，业务可以要求第三方数据源返回满足筛选条件的【个数】
+   * 或者说每个【分组】里面的个数
+   */
+  seriesArray: Series[] | 'COUNTA';
+  
+  
+  // ------ 配置默认值
+    /**
+   * 数据源筛选条件
+   * 按照约定，view 和 viewId 同时存在
+   * Custom 和自定义的 filterInfo 同时存在
+   */
+   //默认值  {SourceType:'ALL'}
+  source: CommonDataConditionItemSource;
+  
+    /**
+   * 值排序规则
+   *
+   * 按照二维数据表生成的数据进行排序， 可以选择正序还是逆序，暂时是为了图表按照y值排序提供的。
+   * 如果是多个系列，则按照第一个系列排，两值相等的话，进行下一个数据比较，以此类推
+   */
+   // 默认值 { order?: ORDER_ENUM.ASCENDING,sortType: DATA_SOURCE_SORT_TYPE.GROUP;}
+  dataSort?: ISort;
+ }
+```
+##### 数据表ID： tableID：string类型  
+##### 分组依据： group: string[]类型， 指定了二维表的首列和首行结构，指定 group[0] 的列 id，会作为二维表的首列，指定 group[1] 的列 id，会作为二维表的首行。
+##### 建列依据： seriesArray 
+
+
+
+
+
+
 ### 在当前仪表盘中新增一个图表， addChart: (DashBoardId: string, chartName: string, type: DetailChart, commonDataCondition: ICommonDataCondition)=>Promise<string>
+#### DashBoardId: 用于添加图表的仪表盘
+#### chartName: 新建图表的名字
+#### type: 新建图表的类型
+#### commonDataCondition： 新建图表所需的数据来源和创建依据
 示例
 const chartID = await BaseAISDK.addChart("123456abcdef", "第一季度销售额", DetailChart.column, commonDataCondition)
 
