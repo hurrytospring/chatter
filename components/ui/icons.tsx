@@ -188,12 +188,11 @@ function IconUser({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 256 256"
-      fill="currentColor"
-      className={cn('h-4 w-4', className)}
-      {...props}
+      height="24"
+      viewBox="0 -960 960 960"
+      width="24"
     >
-      <path d="M230.92 212c-15.23-26.33-38.7-45.21-66.09-54.16a72 72 0 1 0-73.66 0c-27.39 8.94-50.86 27.82-66.09 54.16a8 8 0 1 0 13.85 8c18.84-32.56 52.14-52 89.07-52s70.23 19.44 89.07 52a8 8 0 1 0 13.85-8ZM72 96a56 56 0 1 1 56 56 56.06 56.06 0 0 1-56-56Z" />
+      <path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z" />
     </svg>
   )
 }
@@ -476,6 +475,32 @@ function IconChevronUpDown({
   )
 }
 
+function IconSmartRobot({ className, ...props }: React.ComponentProps<'svg'>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height="24"
+      width="24"
+      viewBox="0 -960 960 960"
+      fill="currentColor"
+    >
+      <path d="M160-360q-50 0-85-35t-35-85q0-50 35-85t85-35v-80q0-33 23.5-56.5T240-760h120q0-50 35-85t85-35q50 0 85 35t35 85h120q33 0 56.5 23.5T800-680v80q50 0 85 35t35 85q0 50-35 85t-85 35v160q0 33-23.5 56.5T720-120H240q-33 0-56.5-23.5T160-200v-160Zm200-80q25 0 42.5-17.5T420-500q0-25-17.5-42.5T360-560q-25 0-42.5 17.5T300-500q0 25 17.5 42.5T360-440Zm240 0q25 0 42.5-17.5T660-500q0-25-17.5-42.5T600-560q-25 0-42.5 17.5T540-500q0 25 17.5 42.5T600-440ZM320-280h320v-80H320v80Zm-80 80h480v-480H240v480Zm240-240Z" />
+    </svg>
+  )
+}
+function IconSend({ className, ...props }: React.ComponentProps<'svg'>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      viewBox="0 -960 960 960"
+      {...props}
+    >
+      <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" />
+    </svg>
+  )
+}
+
 export {
   IconEdit,
   IconNextChat,
@@ -503,5 +528,7 @@ export {
   IconShare,
   IconUsers,
   IconExternalLink,
-  IconChevronUpDown
+  IconChevronUpDown,
+  IconSmartRobot,
+  IconSend
 }

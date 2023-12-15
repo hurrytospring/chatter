@@ -3,33 +3,45 @@
 import { nanoid } from '@/lib/utils'
 import { Chat } from '@/components/chat'
 import { Message } from 'ai'
-import plugin_prompt from '@/prompt/base_open_plugin.md'
+import plugin_prompt from '@/prompt/base_main.md'
 import { useEffect, useState } from 'react'
 import  CircularProgress from '@mui/material/CircularProgress';
 import { bitable } from '@lark-base-open/js-sdk'
+import { BaseAISDK } from '@/lib/base-ai-sdk/base-ai-sdk'
 
 async function getInitPrompt() {
   const table = await bitable.base.getActiveTable()
   const metaList = await table.getFieldMetaList()
-  return plugin_prompt.replaceAll(`{{tableSchema}}`, JSON.stringify(metaList))
+  const newList = metaList.map(obj=>{return  {id:obj.id,name:obj.name}})
+  return  JSON.stringify(newList);
 }
 export default function IndexPage() {
   const id = nanoid()
   const [loading, setLoading] = useState(true)
-  const [initPrompt, setInitPrompt] = useState('')
+  const [initCtx, setInitCtx] = useState('')
   useEffect(() => {
+    console.log("why you once!!!!!!!")
     getInitPrompt().then(p => {
-      setInitPrompt(p)
+      setInitCtx(p)
       setLoading(false)
     })
   }, [])
   const message: Message[] = [
     {
       id: nanoid(),
-      content: initPrompt,
-      role: 'user'
+      content: plugin_prompt,
+      role: 'system',
+      createdAt:new Date()
+    },
+
+    {
+      id: nanoid(),
+      content:`当前表结构为：${initCtx}, 其中含有用户字段名，id等信息，请你根据它推测用户的需求，并给出更具体的任务描述` ,
+      role: 'system',
+      createdAt:new Date()
     }
   ]
   if (loading) return <CircularProgress />
-  return <Chat id={id} initialMessages={message} />
+  //TODO:用更好的方式处理这里的type相关
+  return <Chat id={id} initialMessages={message}/>
 }

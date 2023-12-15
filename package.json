@@ -36,6 +36,7 @@
     "clsx": "^2.0.0",
     "focus-trap-react": "^10.2.3",
     "geist": "^1.1.0",
+    "json5": "^2.2.3",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "material": "link:@types/@mui/material",

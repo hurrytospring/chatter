@@ -8,9 +8,11 @@ import remarkMath from 'remark-math'
 import { cn } from '@/lib/utils'
 import { CodeBlock } from '@/components/ui/codeblock'
 import { MemoizedReactMarkdown } from '@/components/markdown'
-import { IconOpenAI, IconUser } from '@/components/ui/icons'
+import { IconOpenAI, IconSmartRobot, IconUser } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
-
+import { langCompMapping } from '../lib/custom-code-block'
+import robotIcon from "/robot.jpeg"
+import Image from 'next/image'
 export interface ChatMessageProps {
   message: Message
 }
@@ -23,13 +25,14 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
     >
       <div
         className={cn(
-          'flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md border shadow',
+          'flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-md border shadow overflow-hidden',
           message.role === 'user'
             ? 'bg-background'
-            : 'bg-primary text-primary-foreground'
+            // : 'bg-primary text-primary-foreground'
+            :'bg-background'
         )}
       >
-        {message.role === 'user' ? <IconUser /> : <IconOpenAI />}
+        {message.role === 'user' ? <IconUser /> : <Image src="/robot.jpeg" alt="" width={32} height={32}/>}
       </div>
       <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown
@@ -51,7 +54,11 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
               }
 
               const match = /language-(\w+)/.exec(className || '')
-
+              const language = (match && match[1]) || ''
+              const CustomRender = langCompMapping[language]
+              if (CustomRender) {
+                return <CustomRender code={children} />
+              }
               if (inline) {
                 return (
                   <code className={className} {...props}>

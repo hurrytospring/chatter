@@ -1,10 +1,9 @@
-import { kv } from '@vercel/kv'
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 import OpenAI from 'openai'
 
 import { auth } from '@/install'
 import { nanoid } from '@/lib/utils'
-import { functions } from '@/lib/functions'
+import { kv } from '@vercel/kv'
 
 export const runtime = 'edge'
 
@@ -15,7 +14,7 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
   const json = await req.json()
 
-  const { messages, previewToken } = json
+  const { messages, previewToken, modelConfig={} } = json
   const userId = (await auth())?.user.id
 
   if (!userId) {
@@ -23,17 +22,19 @@ export async function POST(req: Request) {
       status: 401
     })
   }
-  console.log('previewToken',previewToken)
+  console.log('previewToken', previewToken)
   if (previewToken) {
     openai.apiKey = previewToken
   }
   const res = await openai.chat.completions.create({
+    //gpt-4-1106-preview
     model: 'gpt-3.5-turbo',
     messages,
     temperature: 0.7,
     stream: true,
-    functions
+    ...modelConfig
   })
+
   const stream = OpenAIStream(res, {
     async onCompletion(completion) {
       const title = json.messages[0].content.substring(0, 100)
@@ -72,7 +73,6 @@ export async function POST(req: Request) {
     //       temperature: 20,
     //       unit: args.format === 'celsius' ? 'C' : 'F',
     //     };
-   
     //     // `createFunctionCallMessages` constructs the relevant "assistant" and "function" messages for you
     //     const newMessages = createFunctionCallMessages(weatherData);
     //     return openai.chat.completions.create({

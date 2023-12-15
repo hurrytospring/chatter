@@ -46,3 +46,8 @@ export const cookieKey = 'chatter-baseId'
 
 export const sleep = (interval: number) =>
   new Promise(resolve => setTimeout(resolve, interval))
+
+
+export  function parseJSON(jsonString:string) {
+    return new Function('return ' + jsonString)();
+  }
