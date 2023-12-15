@@ -229,181 +229,181 @@ export class BaseAISDK {
 
     }
   }
+//会报错， 暂时注释
+//   static async addDashboard(){     
+//     const blockService = await getDashboardBlockService(bitableStore);
+//     const blockManager = blockService?.getBlockManager();
 
-  static async addDashboard(){     
-    const blockService = await getDashboardBlockService(bitableStore);
-    const blockManager = blockService?.getBlockManager();
+//     //todo:blockManager ！断言
+//     const resp = await blockManager!.modelManager.createToken(params.type, getCirculationInfo(params.type), {});
+//     const { token } = resp;
+//     this.updateShowTempItem(false);
 
-    //todo:blockManager ！断言
-    const resp = await blockManager!.modelManager.createToken(params.type, getCirculationInfo(params.type), {});
-    const { token } = resp;
-    this.updateShowTempItem(false);
-
-    const ret = await operate.baseOperate.addBlock({
-      token,
-      type: BlockType.DASHBOARD,
-    });
-    return ret;
-  }
+//     const ret = await operate.baseOperate.addBlock({
+//       token,
+//       type: BlockType.DASHBOARD,
+//     });
+//     return ret;
+//   }
   
   
-  static async addChart(DashBoardId: string, chartName: string, type: DetailChart, commonDataCondition: ICommonDataCondition){
-    const table = await bitable.base.getTableById(commonDataCondition.tableId)
-    const dashBoard = await table.getDashBoardById(DashBoardId)
-    const chart = dashBoard.addchart(chartName,type,commonDataCondition)
-  }
+//   static async addChart(DashBoardId: string, chartName: string, type: DetailChart, commonDataCondition: ICommonDataCondition){
+//     const table = await bitable.base.getTableById(commonDataCondition.tableId)
+//     const dashBoard = await table.getDashBoardById(DashBoardId)
+//     const chart = dashBoard.addchart(chartName,type,commonDataCondition)
+//   }
+// }
+  
+// export declare enum DetailChart {
+//   unknown = 0,
+//   /**
+//    * 基于xy坐标系的图表类型
+//    */
+//   xy = 1048576,
+//   /**
+//    * xy的衍生类型：能够进行堆叠的图表类型、
+//    * 以及其具体的堆叠子类型（不堆叠、堆叠非百分比、百分比堆叠）；
+//    */
+//   stackAble = 1048832,
+//   noStack = 1049344,
+//   stack = 1049856,
+//   stackPercentage = 1050880,
+//   /**
+//    * xy下的线型图表类型
+//    * 以及其具体的线型子类型（直线、曲线、阶梯）；
+//    */
+//   lineLike = 1052672,
+//   linear = 1060864,
+//   smooth = 1069056,
+//   stepped = 1085440,
+//   /**
+//    * xy下会交换坐标轴的图表类型（比如条形图）
+//    */
+//   swapAxes = 1114112,
+//   //柱状
+//   column = 1048833,
+//   bar = 1114370,
+//   line = 1052932,
+//   area = 1052936,
+//   //散点图
+//   scatter = 1048592,
+//   //组合
+//   combo = 1052960,
+//   /**
+//    * 组合图的子类型
+//    */
+//   dualAxes = 1053024,
+//   /** 极坐标 */
+//   radial = 1179648,
+//   /** 雷达图 */
+//   radar = 1441792,
+//   /** 普通折线雷达图 */
+//   lineRadar = 1441793,
+//   /** 带数据标记的雷达图 */
+//   linePointRadar = 1441794,
+//   /** 填充雷达图 */
+//   areaRadar = 1441796,
+//   /**
+//    * 饼图的类型
+//    */
+//   pie = 2097152,
+//   normalPie = 2097408,
+//   donut = 2097664,
+//   statistics = 4194304,
+//   wordCloud = 8388608,
+//   /**
+//    * 漏斗图
+//    */
+//   funnel = 16777216,
+//   normalFunnel = 16777472,
+//   bilateralFunnel = 16777728,
+//   /**
+//    * 瀑布图
+//    */
+//   waterfall = 1572864,
+//   /**
+//    * 排列图
+//    */
+//   pareto = 33554432,
+//   /**
+//    * 气泡图 1 << 26
+//    */
+//   bubble = 67108864
+// }
+  
+// export interface Series {
+//   fieldId: string;
+//   rollup: Rollup;
+// }
+
+//  export enum GroupMode {
+//   ENUMERATED = 'enumerated', // 拆分统计，“A,B,C” -> A | B | C
+//   INTEGRATED = 'integrated', // 不拆分统计，“A,B,C” -> “A,B,C”
+// }
+
+// export enum Rollup {
+//   SUM = 'SUM',
+//   AVERAGE = 'AVERAGE',
+//   COUNTA = 'COUNTA',
+//   MAX = 'MAX',
+//   MIN = 'MIN',
+// }
+
+// export interface ISort {
+//   order?: ORDER_ENUM;
+//   sortType: DATA_SOURCE_SORT_TYPE;
+// }
+
+// export interface ICommonDataCondition{
+//   tableId: string;
+
+//   /**
+//    * 分组依据
+//    *
+//    * 指定二维表的首列、首行结构
+//    * 指定 group[0] 的列 id，会作为二维表的首列
+//    * 指定 group[1] 的列 id，会作为二维表的首行
+//    *
+//    * 目前这个能力用于 Chart 和 Stat. 注意：指定两个分组时，只能有一个 SeriesArray
+//    */
+//    // 字段为多选时，拆分统计 ，GroupMode='enumerated'
+//   group: (string | IGroupItem)[];
+
+//   /**
+//    * 指定要作为二维表的列
+//    * 可以指定 seriesArray[n].fieldId 作为每一个列的内容，并且可以指定统计方式
+//    * Max, min, average, sum, counta 等 (原值待支持)
+//    *
+//    * "COUNTA" 是一个特殊需求，业务可以要求第三方数据源返回满足筛选条件的【个数】
+//    * 或者说每个【分组】里面的个数
+//    */
+//   seriesArray: Series[] | 'COUNTA';
+  
+  
+//   // ------ 配置默认值
+//     /**
+//    * 数据源筛选条件
+//    * 按照约定，view 和 viewId 同时存在
+//    * Custom 和自定义的 filterInfo 同时存在
+//    */
+//    //默认值  {SourceType:'ALL'}
+//   source?: CommonDataConditionItemSource;
+  
+//     /**
+//    * 值排序规则
+//    *
+//    * 按照二维数据表生成的数据进行排序， 可以选择正序还是逆序，暂时是为了图表按照y值排序提供的。
+//    * 如果是多个系列，则按照第一个系列排，两值相等的话，进行下一个数据比较，以此类推
+//    */
+//    // 默认值 { order?: ORDER_ENUM.ASCENDING,sortType: DATA_SOURCE_SORT_TYPE.GROUP;}
+//   dataSort?: ISort;
+//  }
+//  //其他配置，
+//  interface ISnapshot{
+//     overrideViewModel: {
+//     // 默认，横轴将数字视为文本
+//     cartesian: {  combo: { detail: {} }, indexAxes: { axes: [{ type: 'ordinal' }] } }
+//     }
+//  }
 }
-  
-export declare enum DetailChart {
-  unknown = 0,
-  /**
-   * 基于xy坐标系的图表类型
-   */
-  xy = 1048576,
-  /**
-   * xy的衍生类型：能够进行堆叠的图表类型、
-   * 以及其具体的堆叠子类型（不堆叠、堆叠非百分比、百分比堆叠）；
-   */
-  stackAble = 1048832,
-  noStack = 1049344,
-  stack = 1049856,
-  stackPercentage = 1050880,
-  /**
-   * xy下的线型图表类型
-   * 以及其具体的线型子类型（直线、曲线、阶梯）；
-   */
-  lineLike = 1052672,
-  linear = 1060864,
-  smooth = 1069056,
-  stepped = 1085440,
-  /**
-   * xy下会交换坐标轴的图表类型（比如条形图）
-   */
-  swapAxes = 1114112,
-  //柱状
-  column = 1048833,
-  bar = 1114370,
-  line = 1052932,
-  area = 1052936,
-  //散点图
-  scatter = 1048592,
-  //组合
-  combo = 1052960,
-  /**
-   * 组合图的子类型
-   */
-  dualAxes = 1053024,
-  /** 极坐标 */
-  radial = 1179648,
-  /** 雷达图 */
-  radar = 1441792,
-  /** 普通折线雷达图 */
-  lineRadar = 1441793,
-  /** 带数据标记的雷达图 */
-  linePointRadar = 1441794,
-  /** 填充雷达图 */
-  areaRadar = 1441796,
-  /**
-   * 饼图的类型
-   */
-  pie = 2097152,
-  normalPie = 2097408,
-  donut = 2097664,
-  statistics = 4194304,
-  wordCloud = 8388608,
-  /**
-   * 漏斗图
-   */
-  funnel = 16777216,
-  normalFunnel = 16777472,
-  bilateralFunnel = 16777728,
-  /**
-   * 瀑布图
-   */
-  waterfall = 1572864,
-  /**
-   * 排列图
-   */
-  pareto = 33554432,
-  /**
-   * 气泡图 1 << 26
-   */
-  bubble = 67108864
-}
-  
-export interface Series {
-  fieldId: string;
-  rollup: Rollup;
-}
-
- export enum GroupMode {
-  ENUMERATED = 'enumerated', // 拆分统计，“A,B,C” -> A | B | C
-  INTEGRATED = 'integrated', // 不拆分统计，“A,B,C” -> “A,B,C”
-}
-
-export enum Rollup {
-  SUM = 'SUM',
-  AVERAGE = 'AVERAGE',
-  COUNTA = 'COUNTA',
-  MAX = 'MAX',
-  MIN = 'MIN',
-}
-
-export interface ISort {
-  order?: ORDER_ENUM;
-  sortType: DATA_SOURCE_SORT_TYPE;
-}
-
-export interface ICommonDataCondition{
-  tableId: string;
-
-  /**
-   * 分组依据
-   *
-   * 指定二维表的首列、首行结构
-   * 指定 group[0] 的列 id，会作为二维表的首列
-   * 指定 group[1] 的列 id，会作为二维表的首行
-   *
-   * 目前这个能力用于 Chart 和 Stat. 注意：指定两个分组时，只能有一个 SeriesArray
-   */
-   // 字段为多选时，拆分统计 ，GroupMode='enumerated'
-  group: (string | IGroupItem)[];
-
-  /**
-   * 指定要作为二维表的列
-   * 可以指定 seriesArray[n].fieldId 作为每一个列的内容，并且可以指定统计方式
-   * Max, min, average, sum, counta 等 (原值待支持)
-   *
-   * "COUNTA" 是一个特殊需求，业务可以要求第三方数据源返回满足筛选条件的【个数】
-   * 或者说每个【分组】里面的个数
-   */
-  seriesArray: Series[] | 'COUNTA';
-  
-  
-  // ------ 配置默认值
-    /**
-   * 数据源筛选条件
-   * 按照约定，view 和 viewId 同时存在
-   * Custom 和自定义的 filterInfo 同时存在
-   */
-   //默认值  {SourceType:'ALL'}
-  source?: CommonDataConditionItemSource;
-  
-    /**
-   * 值排序规则
-   *
-   * 按照二维数据表生成的数据进行排序， 可以选择正序还是逆序，暂时是为了图表按照y值排序提供的。
-   * 如果是多个系列，则按照第一个系列排，两值相等的话，进行下一个数据比较，以此类推
-   */
-   // 默认值 { order?: ORDER_ENUM.ASCENDING,sortType: DATA_SOURCE_SORT_TYPE.GROUP;}
-  dataSort?: ISort;
- }
- //其他配置，
- interface ISnapshot{
-    overrideViewModel: {
-    // 默认，横轴将数字视为文本
-    cartesian: {  combo: { detail: {} }, indexAxes: { axes: [{ type: 'ordinal' }] } }
-    }
- }
-
-// global.window.BaseAISDK = BaseAISDK
+// // global.window.BaseAISDK = BaseAISDK

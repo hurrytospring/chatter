@@ -13,10 +13,10 @@ export interface ChatList {
  }
 
 export function ChatList({ messages,hiddenMessageNum}: ChatList) {
+  const {debugMode} = useDebugMode()
   if (!messages.length) {
     return null
   }
-  const {debugMode} = useDebugMode()
   return (
     <div className="relative mx-auto max-w-2xl px-4">
       {messages.map((message, index) => (

@@ -48,7 +48,7 @@ const initialMessages: Message[] = [
     createdAt:new Date()
   }
 ]
-export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:string)=>void) => {
+export const usePageCreatorAgent = (operate: Operator) => {
   const lastMsgRef = useRef<Message | null>(null)
 
   const { reload, setMessages } = useChat({
@@ -83,7 +83,7 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
         try {
           const code = args.code
           console.log('gen code:22222', code)
-          setPageStatus("loaded")
+          // setPageStatus("loaded")
           operate({
             type: 'add',
             data: {
@@ -115,7 +115,7 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
         2
       )}`
     )
-    setPageStatus("loading")
+    // setPageStatus("loading")
     const curDetailData = await BaseAISDK.getCurDetailData()
     const curListData = await BaseAISDK.getCurListData()
     //TODO:调整prompt使得生成页面更加美观， 且能适应各种页面

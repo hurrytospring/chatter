@@ -1,5 +1,5 @@
 import { ChatRequest, FunctionCall, FunctionCallHandler, Message } from 'ai'
-import { useChat } from 'ai/react/dist'
+import { useChat } from 'ai/react'
 import { nanoid, parseJSON } from '../utils'
 import { AgentConfig, FunctionCallHandlerWithAssert } from '../types'
 import { before } from 'lodash'

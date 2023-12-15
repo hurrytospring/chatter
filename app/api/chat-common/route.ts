@@ -34,7 +34,8 @@ export async function POST(req: Request) {
     stream: true,
     ...modelConfig
   })
-
+  //TODO:暂时搁置类型问题（这还是官方的）
+//@ts-ignore
   const stream = OpenAIStream(res, {
     async onCompletion(completion) {
       const title = json.messages[0].content.substring(0, 100)
