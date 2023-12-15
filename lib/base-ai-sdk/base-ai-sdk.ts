@@ -246,6 +246,11 @@ export class BaseAISDK {
     return ret;
   }
   
+  static async getFieldIdbyName(tableId: string, fieldName: string){
+    const table = await bitable.base.getTableById(tableId);
+    const field = await table.getField(fieldName);
+    return field.id
+  }
   
   static async addChart(DashBoardId: string, chartName: string, type: DetailChart, commonDataCondition: ICommonDataCondition){
     const table = await bitable.base.getTableById(commonDataCondition.tableId)
@@ -330,7 +335,7 @@ export declare enum DetailChart {
    */
   bubble = 67108864
 }
-  
+
 export interface Series {
   fieldId: string;
   rollup: Rollup;

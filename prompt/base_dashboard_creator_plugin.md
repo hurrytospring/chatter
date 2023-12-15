@@ -6,13 +6,23 @@
 
 
 ### 获取当前选中的数据表 getTable: () => Promise<ITable>;
-示例，typescript
+示例
+```typescript
 const table = await BaseAISDK.getTable();
+```
 
+### 通过字段名获取字段id  getFieldIdbyName: (tableId: string, fieldName: string) =><string>
+示例
+```typescript
+const fieldId = getFieldIdbyName("tbqwerty123456","销售额");
+```
 
 ### 在当前多维表格中新建一个仪表盘,新增成功后返回dashboardID Dashboard:()=>Promise<string>
-示例 
+示例
+```typescript
 const dashBoardID = await BaseAISDK.addDashBoard();
+``` 
+
 
 ### 在新增图表时可能会用到的数据结构： 
 #### DetailChart是一个枚举类型，用来保存图表的每种类型和对应的id   
@@ -166,8 +176,8 @@ export interface Series {
  }
 ```
 ##### 数据表ID： tableID：string类型  
-##### 分组依据： group: string[]类型， 指定了二维表的首列和首行结构，指定 group[0] 的列 id，会作为二维表的首列，指定 group[1] 的列 id，会作为二维表的首行。
-##### 建列依据： seriesArray 
+##### 分组依据： group: string或IGroupItem的数组类型，具有固定长度为2，指定了二维表的首列和首行结构，group[0]为二维表的首列对应的fieldId，group[1]为二维表的首行对应的fieldId。在创建图表时，应首先根据用户输入的字段名找到对应的字段id构造group变量。
+##### 建列依据： seriesArray: Series的数组类型或字符串"COUNTA"，在创建图表时，如使用Series类型来创建seriesArray，应首先根据用户输入的字段名找到对应的字段id创建Series。
 
 
 
