@@ -1,8 +1,10 @@
+"use client"
+
 import {
   CardMessageProvider,
   useCardMessageContext
 } from '../float-chatter/message-context'
-import { FloatChatter } from '../float-chatter/float-chatter'
+// import { FloatChatter } from '../float-chatter/float-chatter'
 import { ChatProps } from './types'
 import { ChatPure } from './chat'
 import { useEffect, useState } from 'react'
@@ -50,7 +52,7 @@ export function Chat(props: ChatProps) {
           <ModalContent />
         </Modal> */}
 
-        <ChatPure {...props} setPageStatus={setPageStatus}></ChatPure>
+        <ChatPure {...props}></ChatPure>
       </div>
     </CardMessageProvider>
   )

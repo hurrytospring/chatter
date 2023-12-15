@@ -51,7 +51,7 @@ export function ChatPure({
   id,
   initialMessages,
   className,
-  setPageStatus
+  // setPageStatus
 }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
@@ -62,7 +62,7 @@ export function ChatPure({
   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
   const { operate } = useCardMessageContext()
-  const pageCreatorAgentHandle = usePageCreatorAgent(operate, setPageStatus)
+  const pageCreatorAgentHandle = usePageCreatorAgent(operate)
   const sysAgentHandle = useSysAgent(operate)
   const dataAnasisAgentHandle = useUniAgent(dataAnasisAgentConfig)
   const dashboardAgentHandle = useDashboardAgent(operate)

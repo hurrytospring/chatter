@@ -22,6 +22,8 @@ export const CardMessageProvider: React.FC<{children:ReactElement}> = ({ childre
     useState<CardMessage[]>(initialCardMessages)
     console.log(88888,cardList)
   const operate = (operation: Operation) => {
+    // @ts-ignore
+    //TODO:修正这里的类型问题
     setCardMessageList(list => {
       if (operation.type === 'update') {
         const updatedCardMessages = list.map(card => {
