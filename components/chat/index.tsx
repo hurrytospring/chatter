@@ -8,30 +8,29 @@ import { ChatPure } from './chat'
 import { useEffect, useState } from 'react'
 import { FloatButton, Modal } from 'antd'
 export function Chat(props: ChatProps) {
-  const [showFloat, setShowFloat] = useState(false)
+  // const [showFloat, setShowFloat] = useState(false)
   const [pageStatus, setPageStatus] = useState('no page')
-  const changeShowFloat = () => {
-    setShowFloat(!showFloat)
-  }
-  // const cardMessageContext = useCardMessageContext()
-  //TODO：优化这里的加载和交互
-  const ModalContent = () => {
-    switch (pageStatus) {
-      case 'no page':
-        return <div>no</div>
-      case 'loading':
-        return <div>loading</div>
-      case 'loaded':
-        return <FloatChatter className="w-full h-[500px] overflow-scroll" />
-      default:
-        return <></>
-    }
-  }
+  // const changeShowFloat = () => {
+  //   setShowFloat(!showFloat)
+  // }
+  // // const cardMessageContext = useCardMessageContext()
+  // const ModalContent = () => {
+  //   switch (pageStatus) {
+  //     case 'no page':
+  //       return <div>no</div>
+  //     case 'loading':
+  //       return <div>loading</div>
+  //     case 'loaded':
+  //       return <FloatChatter className="w-full h-[500px] overflow-scroll" />
+  //     default:
+  //       return <></>
+  //   }
+  // }
 
   return (
     <CardMessageProvider>
       <div className="flex-1">
-        <FloatButton
+        {/* <FloatButton
           // style={{ top: '50%' }}
           className='top-[50%]'
           onClick={changeShowFloat}
@@ -49,7 +48,7 @@ export function Chat(props: ChatProps) {
           }}
         >
           <ModalContent />
-        </Modal>
+        </Modal> */}
 
         <ChatPure {...props} setPageStatus={setPageStatus}></ChatPure>
       </div>

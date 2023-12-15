@@ -1,11 +1,11 @@
-export type CardMessageType='Default'|'Dynamic';
-export interface CardMessage {
-    id: string
-    time: number
+import { FunctionCall, Message } from "ai";
+
+export type CardMessageType='Default'|'Dynamic'|'Chat'|'Loading';
+export interface CardMessage extends Message{
     type: CardMessageType
     sender: string
-    content: any
-    status: 'pending' | 'done'
+    status: 'pending' | 'done',
+    hidden?: Boolean
   }
 export  interface Operation {
     type: 'add' | 'update'

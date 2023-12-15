@@ -44,7 +44,8 @@ const initialMessages: Message[] = [
   {
     role: 'system',
     content: prompt,
-    id: nanoid()
+    id: nanoid(),
+    createdAt:new Date()
   }
 ]
 export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:string)=>void) => {
@@ -54,7 +55,7 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
     api: '/api/chat-common',
     body: {
       modelConfig: {
-        model: 'gpt-4-1106-preview',
+        model: 'gpt-3.5-turbo',
         functions:[dynamicOutputDef]
         // tools: [
         //   {
@@ -88,7 +89,8 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
             data: {
               id: nanoid(),
               content: code,
-              type: 'Dynamic'
+              type: 'Dynamic',
+              createdAt:new Date()
             }
           })
         } catch (e) {
@@ -130,7 +132,8 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
     const bgMessage = {
       role: 'system',
       content: bgPrompt,
-      id: nanoid()
+      id: nanoid(),
+      createAt:new Date()
     } as const
     setMessages([
       bgMessage,
@@ -138,7 +141,8 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
       {
         role: 'user',
         content: functionCall.arguments || '',
-        id: nanoid()
+        id: nanoid(),
+        createdAt:new Date()
       }
     ])
     await reload()
@@ -159,7 +163,8 @@ export const usePageCreatorAgent = (operate: Operator,setPageStatus:(status:stri
           role: 'function' as const,
           content: JSON.stringify({
             result: '生成完成'
-          })
+          }),
+          createdAt:new Date()
         }
       ]
     } as ChatRequest

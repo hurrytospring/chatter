@@ -13,8 +13,6 @@ async function getInitPrompt() {
   const table = await bitable.base.getActiveTable()
   const metaList = await table.getFieldMetaList()
   const newList = metaList.map(obj=>{return  {id:obj.id,name:obj.name}})
-  console.log("data",await BaseAISDK.getCurListData())
-  // console.log("data",data)
   return  JSON.stringify(newList);
 }
 export default function IndexPage() {
@@ -22,6 +20,7 @@ export default function IndexPage() {
   const [loading, setLoading] = useState(true)
   const [initCtx, setInitCtx] = useState('')
   useEffect(() => {
+    console.log("why you once!!!!!!!")
     getInitPrompt().then(p => {
       setInitCtx(p)
       setLoading(false)
@@ -31,12 +30,15 @@ export default function IndexPage() {
     {
       id: nanoid(),
       content: plugin_prompt,
-      role: 'system'
+      role: 'system',
+      createdAt:new Date()
     },
+
     {
       id: nanoid(),
       content:`当前表结构为：${initCtx}, 其中含有用户字段名，id等信息，请你根据它推测用户的需求，并给出更具体的任务描述` ,
-      role: 'system'
+      role: 'system',
+      createdAt:new Date()
     }
   ]
   if (loading) return <CircularProgress />

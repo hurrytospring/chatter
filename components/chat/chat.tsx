@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { toast } from 'react-hot-toast'
@@ -24,7 +24,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { ChatRequest, FunctionCallHandler, nanoid } from 'ai'
 import { runCode } from '@/app/code_runner'
 import { FieldType, bitable } from '@lark-base-open/js-sdk'
-import lodash from 'lodash'
+import lodash, { isEqual } from 'lodash'
 import {
   pageCreatorFnDef,
   usePageCreatorAgent
@@ -38,10 +38,20 @@ import { ChatProps } from './types'
 import { sysFnDef, useSysAgent } from '@/lib/hooks/use-sys-agent'
 import { useUniAgent } from '@/lib/hooks/use-uni-agent'
 import { dataAnasisAgentConfig } from '@/lib/hooks/use-data-anasis'
+import { CardMessage } from '../float-chatter/types'
+import { useStepContext } from '@mui/material'
+import { merge, useDebugMode } from './chatUtil'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
+//TODO：改正这里的bad code
+let ignore = false
 
-export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatProps) {
+export function ChatPure({
+  id,
+  initialMessages,
+  className,
+  setPageStatus
+}: ChatProps) {
   const router = useRouter()
   const path = usePathname()
   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
@@ -51,7 +61,7 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
   const { operate } = useCardMessageContext()
-  const pageCreatorAgentHandle = usePageCreatorAgent(operate,setPageStatus)
+  const pageCreatorAgentHandle = usePageCreatorAgent(operate, setPageStatus)
   const sysAgentHandle = useSysAgent(operate)
   const dataAnasisAgentHandle = useUniAgent(dataAnasisAgentConfig)
   //注意默认隐藏初始信息
@@ -64,7 +74,13 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
       body: {
         id,
         previewToken,
-        modelConfig: { functions: [pageCreatorFnDef,sysFnDef,dataAnasisAgentConfig.outFnDef] }
+        modelConfig: {
+          functions: [
+            pageCreatorFnDef,
+            sysFnDef,
+            dataAnasisAgentConfig.outFnDef
+          ]
+        }
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -79,23 +95,93 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
       },
       experimental_onFunctionCall: (chatMessages, functionCall) => {
         console.log('————————calling function————————,', functionCall)
+        //设定loading
+        const id = nanoid()
+        operate({
+          type: 'add',
+          data: {
+            id: id,
+            content: functionCall.name,
+            type: 'Loading',
+            createdAt: new Date()
+          }
+        })
+        let agentResultP: Promise<void | ChatRequest>
         if (pageCreatorAgentHandle.assert(functionCall)) {
-          return pageCreatorAgentHandle(chatMessages, functionCall)
-        }else if(sysAgentHandle.assert(functionCall)){
-          return sysAgentHandle(chatMessages,functionCall)
-        }else if(dataAnasisAgentHandle.assert(functionCall)){
-          return dataAnasisAgentHandle(chatMessages,functionCall)
+          agentResultP = pageCreatorAgentHandle(chatMessages, functionCall)
+        } else if (sysAgentHandle.assert(functionCall)) {
+          agentResultP = sysAgentHandle(chatMessages, functionCall)
+        } else if (dataAnasisAgentHandle.assert(functionCall)) {
+          agentResultP = dataAnasisAgentHandle(chatMessages, functionCall)
+        } else {
+          agentResultP = new Promise(() => {})
         }
-        return
+        //这里要把消息update上去实在是不方便，就把loading隐藏了吧
+        agentResultP.then((chRe: void | ChatRequest) => {
+          operate({
+            type: 'update',
+            data: {
+              id: id,
+              hidden: true
+            }
+          })
+        })
+        return agentResultP
       }
     })
+  const [displayMessages, setDisplayMessages] = useState<CardMessage[]>([])
+  const ctx = useCardMessageContext()
+  const useCompare = (value: any, compare: (v1: any, v2: any) => boolean) => {
+    const ref = useRef(null)
+    if (!compare(value, ref.current)) {
+      ref.current = value
+    }
+    return ref.current
+  }
+  const { debugMode } = useDebugMode()
+  const deps = [
+    useCompare(messages, isEqual),
+    useCompare(ctx.cards, isEqual),
+    debugMode
+  ]
+
+  useEffect(() => {
+    setDisplayMessages(merge(messages, ctx.cards, debugMode, operate))
+    console.log('displayMessages', displayMessages)
+    console.log('messages', messages)
+    console.log('debugMode', debugMode)
+  }, deps)
+  //TODO:搞定这里的多次提醒问题
+  useEffect(() => {
+    if (!ignore) {
+      operate({
+        type: 'add',
+        data: {
+          id: '1',
+          type: 'Chat',
+          //TODO：搞清这里怎么换行
+          content: `您好，这里是Chatter插件，可以用来进行系统搭建，页面生成，数据分析等功能
+          您可以试着发出以下指令：
+          创建一个招聘系统，给出相关方案
+          根据当前记录生成详情页面
+          分析所有订单的平均ARR是多少
+          `,
+          createdAt: new Date()
+        }
+      })
+    }
+    ignore = true
+  }, [])
 
   return (
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
         {messages.length ? (
           <>
-            <ChatList messages={messages} hiddenMessageNum = {iniMessageNum}/>
+            <ChatList
+              messages={displayMessages}
+              hiddenMessageNum={iniMessageNum}
+            />
             <ChatScrollAnchor trackVisibility={isLoading} />
           </>
         ) : (
@@ -151,5 +237,3 @@ export function ChatPure({ id, initialMessages, className,setPageStatus }: ChatP
     </>
   )
 }
-
-

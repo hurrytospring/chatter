@@ -32,7 +32,8 @@ const initialMessages: Message[] = [
   {
     role: 'system',
     content: prompt,
-    id: nanoid()
+    id: nanoid(),
+    createdAt:new Date()
   }
 ]
 export const useSysAgent = (operate: Operator) => {
@@ -71,6 +72,7 @@ export const useSysAgent = (operate: Operator) => {
             // content: JSON.stringify({
             //   result
             // })
+            createdAt:new Date(),
             content: result
           }
         ]
@@ -92,19 +94,21 @@ export const useSysAgent = (operate: Operator) => {
     const bgMessage = {
       role: 'system',
       content: bgPrompt,
-      id: nanoid()
+      id: nanoid(),
+      createdAt:new Date(),
+
     } as const
 
     setMessages([
       bgMessage,
       ...initialMessages,
-      { role: 'user', content: functionCall.arguments || '', id: nanoid() }
+      { role: 'user', content: functionCall.arguments || '', id: nanoid(),createdAt:new Date() }
     ])
 
 
     console.log('————————new messages sysAgent got————————\n', JSON.stringify([
       bgMessage,
-      { role: 'user', content: functionCall.arguments || '', id: nanoid() }
+      { role: 'user', content: functionCall.arguments || '', id: nanoid(),createdAt:new Date() }
     ], null, 2))
 
     await reload()
@@ -118,6 +122,7 @@ export const useSysAgent = (operate: Operator) => {
           name: fnKey,
           role: 'function' as const,
           content: '表格部分完成，如有剩余流程会继续执行下一步操作。',
+          createdAt: new Date()
         }
       ]
     } as ChatRequest

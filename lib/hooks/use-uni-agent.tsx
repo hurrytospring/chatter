@@ -12,7 +12,8 @@ export const useUniAgent = (agentConfig: AgentConfig) => {
     {
       role: 'system',
       content: agentConfig.sysPrompt,
-      id: nanoid()
+      id: nanoid(),
+      createdAt:new Date()
     }
   ]
 
@@ -37,11 +38,14 @@ export const useUniAgent = (agentConfig: AgentConfig) => {
           ...chatMessages,
           {
             id: nanoid(),
-            name: 'run_javascript_code',
+            name: agentConfig.fnKey,
             role: 'function' as const,
+            createdAt:new Date(),
+
             content: JSON.stringify({
               result
             })
+            
           }
         ]
       }
@@ -58,12 +62,13 @@ export const useUniAgent = (agentConfig: AgentConfig) => {
     const bgMessage = {
       role: 'system',
       content: bgPrompt,
-      id: nanoid()
+      id: nanoid(),
+      createdAt:new Date()
     } as const
     const messageList:Message[] = [
       ...initialMessages,
       bgMessage,    
-      { role: 'user', content: JSON.parse(functionCall?.arguments || "")?.content || '', id: nanoid() },
+      { role: 'user', content: JSON.parse(functionCall?.arguments || "")?.content || '', id: nanoid(),createdAt:new Date() },
     ]
     console.log("before setMessage1",messages)
     // console.log("messageList",messageList.map(e=>e.content))
@@ -82,7 +87,8 @@ export const useUniAgent = (agentConfig: AgentConfig) => {
           role: 'function' as const,
           content: JSON.stringify({
             result:fcResult
-          })
+          }),
+          createdAt:new Date()
         }
       ]
     } as ChatRequest

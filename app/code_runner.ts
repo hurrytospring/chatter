@@ -35,12 +35,20 @@ export async function runCode(userCode: string, ctx: Record<string, any>) {
 const genStaticSyncCode = (userCode: string, keys: string[]) => {
   const code = trim(userCode, ';')
   return `
-   function syncOperation(${keys.join(',')}) {
-   const comp=React.createElement((function (){${code}})());
-   return comp;  
-  }
-  return syncOperation(${keys.join(',')})
+  function syncOperation(${keys.join(',')}) {
+   ${code}
+  const comp=React.createElement(Comp);
+  return comp;  
+ }
+ return syncOperation(${keys.join(',')})
 `
+//   return `
+//    function syncOperation(${keys.join(',')}) {
+//    const comp=React.createElement((function (){${code}})());
+//    return comp;  
+//   }
+//   return syncOperation(${keys.join(',')})
+// `
   //   return `
   //    function syncOperation(${keys.join(',')}) {
   //    const comp=React.createElement((function (){${code}})());
@@ -54,16 +62,16 @@ const genStaticSyncCode = (userCode: string, keys: string[]) => {
 export function runCodeSync(userCode: string, ctx: Record<string, any>) {
   const keys = Object.keys(ctx)
   const code = genStaticSyncCode(userCode, keys)
-  console.log(new String(code).toString())
+  // console.log(new String(code).toString())
   const dynamicFunction = new Function(...keys, code)
-  console.log(
-    'ctxxxxx',
-    keys.map(key => ctx[key])
-  )
+  // console.log(
+  //   'ctxxxxx',
+  //   keys.map(key => ctx[key])
+  // )
   try {
     //错误处理
     const result = dynamicFunction(...keys.map(key => ctx[key]))
-    console.log('runCodeResult', result)
+    // console.log('runCodeResult', result)
     return result
   } catch (e) {
     //TODO：增加更多的错误处理逻辑
