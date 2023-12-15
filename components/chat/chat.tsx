@@ -41,6 +41,7 @@ import { dataAnasisAgentConfig } from '@/lib/hooks/use-data-anasis'
 import { CardMessage } from '../float-chatter/types'
 import { useStepContext } from '@mui/material'
 import { merge, useDebugMode } from './chatUtil'
+import {dashboardFnDef,useDashboardAgent} from '@/lib/hooks/use-dashboard-agent'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 //TODO：改正这里的bad code
@@ -64,6 +65,8 @@ export function ChatPure({
   const pageCreatorAgentHandle = usePageCreatorAgent(operate, setPageStatus)
   const sysAgentHandle = useSysAgent(operate)
   const dataAnasisAgentHandle = useUniAgent(dataAnasisAgentConfig)
+  const dashboardAgentHandle = useDashboardAgent(operate)
+
   //注意默认隐藏初始信息
   const iniMessageNum = initialMessages?.length || 0
   const { messages, append, reload, stop, isLoading, input, setInput } =
@@ -74,13 +77,7 @@ export function ChatPure({
       body: {
         id,
         previewToken,
-        modelConfig: {
-          functions: [
-            pageCreatorFnDef,
-            sysFnDef,
-            dataAnasisAgentConfig.outFnDef
-          ]
-        }
+        modelConfig: { functions: [pageCreatorFnDef,sysFnDef,dataAnasisAgentConfig.outFnDef,dashboardFnDef] }
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -113,6 +110,8 @@ export function ChatPure({
           agentResultP = sysAgentHandle(chatMessages, functionCall)
         } else if (dataAnasisAgentHandle.assert(functionCall)) {
           agentResultP = dataAnasisAgentHandle(chatMessages, functionCall)
+        }else if(dashboardAgentHandle.assert(functionCall)){
+          agentResultP = dashboardAgentHandle(chatMessages,functionCall)
         } else {
           agentResultP = new Promise(() => {})
         }

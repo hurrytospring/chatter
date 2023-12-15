@@ -40,7 +40,7 @@ export function merge(
     if (!t1) t1 = 0
     let t2 = b.createdAt?.getTime()
     if (!t2) t2 = 0
-    console.log('time', t1, t2)
+    // console.log('time', t1, t2)
     return t1 - t2
   })
   //先用这种垃圾逻辑顶着
