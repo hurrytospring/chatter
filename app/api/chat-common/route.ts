@@ -8,7 +8,8 @@ import { kv } from '@vercel/kv'
 export const runtime = 'edge'
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL:'https://api.openai-proxy.org/v1'
 })
 
 export async function POST(req: Request) {
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
     openai.apiKey = previewToken
   }
   const res = await openai.chat.completions.create({
+    
     //gpt-4-1106-preview
     model: 'gpt-3.5-turbo',
     messages,
