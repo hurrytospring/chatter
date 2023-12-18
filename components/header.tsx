@@ -8,7 +8,7 @@ import { bitable } from '@lark-base-open/js-sdk'
 import { useMessage } from '@/lib/hooks/useMessage'
 import { useRouter } from 'next/navigation'
 import { Switch } from './ui/switch'
-import { useDebugMode } from './chat/chatUtil'
+import { useCardMessageContext } from './float-chatter/message-context'
 
 export function Header() {
   const [message] = useMessage()
@@ -24,7 +24,7 @@ export function Header() {
     message.success('退出登录成功')
     router.replace('/install')
   }
-  const { setDebugMode } = useDebugMode()
+  return null;
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between w-full h-8 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
       <div className="flex items-center">
@@ -36,9 +36,9 @@ export function Header() {
           defaultChecked={true}
           onCheckedChange={v => {
             if (v) {
-              setDebugMode('debug')
+              setDebugMode(true)
             } else {
-              setDebugMode('normal')
+              setDebugMode(false)
             }
           }}
         ></Switch>

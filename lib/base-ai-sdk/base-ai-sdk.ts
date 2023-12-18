@@ -411,4 +411,5 @@ export interface ICommonDataCondition{
     }
  }
 
-// global.window.BaseAISDK = BaseAISDK
+global.window.BaseAISDK = BaseAISDK
+global.window.bitable = bitable

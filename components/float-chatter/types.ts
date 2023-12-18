@@ -5,7 +5,8 @@ export interface CardMessage extends Message{
     type: CardMessageType
     sender: string
     status: 'pending' | 'done',
-    hidden?: Boolean
+    hidden?: Boolean,
+    customContent:''
   }
 export  interface Operation {
     type: 'add' | 'update'

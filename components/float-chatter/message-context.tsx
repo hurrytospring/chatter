@@ -20,7 +20,6 @@ export const useCardMessageContext = () => {
 export const CardMessageProvider: React.FC<{children:ReactElement}> = ({ children }) => {
   const [cardList, setCardMessageList] =
     useState<CardMessage[]>(initialCardMessages)
-    console.log(88888,cardList)
   const operate = (operation: Operation) => {
     // @ts-ignore
     //TODO:修正这里的类型问题

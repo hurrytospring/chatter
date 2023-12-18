@@ -39,9 +39,10 @@ import { sysFnDef, useSysAgent } from '@/lib/hooks/use-sys-agent'
 import { useUniAgent } from '@/lib/hooks/use-uni-agent'
 import { dataAnasisAgentConfig } from '@/lib/hooks/use-data-anasis'
 import { CardMessage } from '../float-chatter/types'
-import { useStepContext } from '@mui/material'
-import { merge, useDebugMode } from './chatUtil'
+import { Switch, useStepContext } from '@mui/material'
+import { merge } from './chatUtil'
 import {dashboardFnDef,useDashboardAgent} from '@/lib/hooks/use-dashboard-agent'
+import { Label } from '@mui/icons-material'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 //TODO：改正这里的bad code
@@ -128,52 +129,13 @@ export function ChatPure({
         return agentResultP
       }
     })
-  const [displayMessages, setDisplayMessages] = useState<CardMessage[]>([])
   const ctx = useCardMessageContext()
-  const useCompare = (value: any, compare: (v1: any, v2: any) => boolean) => {
-    const ref = useRef(null)
-    if (!compare(value, ref.current)) {
-      ref.current = value
-    }
-    return ref.current
-  }
-  const { debugMode } = useDebugMode()
-  const deps = [
-    useCompare(messages, isEqual),
-    useCompare(ctx.cards, isEqual),
-    debugMode
-  ]
+  const [debugMode,setDebugMode]=useState(false)
 
-  useEffect(() => {
-    setDisplayMessages(merge(messages, ctx.cards, debugMode, operate))
-    console.log('displayMessages', displayMessages)
-    console.log('messages', messages)
-    console.log('debugMode', debugMode)
-  }, deps)
-  //TODO:搞定这里的多次提醒问题
-  useEffect(() => {
-    if (!ignore) {
-      operate({
-        type: 'add',
-        data: {
-          id: '1',
-          type: 'Chat',
-          //TODO：搞清这里怎么换行
-          content: `您好，这里是Chatter插件，可以用来进行系统搭建，页面生成，数据分析等功能
-          您可以试着发出以下指令：
-          创建一个招聘系统，给出相关方案
-          根据当前记录生成详情页面
-          分析所有订单的平均ARR是多少
-          `,
-          createdAt: new Date()
-        }
-      })
-    }
-    ignore = true
-  }, [])
+  const displayMessages=merge(messages, ctx.cards, debugMode)
 
   return (
-    <>
+    <div className='overflow-scroll' style={{height:'100vh'}}>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
         {messages.length ? (
           <>
@@ -197,7 +159,8 @@ export function ChatPure({
         input={input}
         setInput={setInput}
       />
-
+      <div  className='absolute bottom-10'>
+      <Switch checked={debugMode} onChange={(_,v)=>setDebugMode(v)} aria-label='debugMode'></Switch></div>
       <Dialog open={previewTokenDialog} onOpenChange={setPreviewTokenDialog}>
         <DialogContent>
           <DialogHeader>
@@ -233,6 +196,6 @@ export function ChatPure({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   )
 }
