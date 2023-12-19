@@ -22,9 +22,6 @@ import { Input } from '../ui/input'
 import { toast } from 'react-hot-toast'
 import { usePathname, useRouter } from 'next/navigation'
 import { ChatRequest, FunctionCallHandler, nanoid } from 'ai'
-import { runCode } from '@/app/code_runner'
-import { FieldType, bitable } from '@lark-base-open/js-sdk'
-import lodash, { isEqual } from 'lodash'
 import {
   pageCreatorFnDef,
   usePageCreatorAgent
@@ -95,11 +92,12 @@ export function ChatPure({
         console.log('————————calling function————————,', functionCall)
         //设定loading
         const id = nanoid()
+        
         operate({
           type: 'add',
           data: {
             id: id,
-            content: functionCall.name,
+            customContent: [],
             type: 'Loading',
             createdAt: new Date()
           }
@@ -116,7 +114,7 @@ export function ChatPure({
         } else {
           agentResultP = new Promise(() => {})
         }
-        //这里要把消息update上去实在是不方便，就把loading隐藏了吧
+        // 这里要把消息update上去实在是不方便，就把loading隐藏了吧
         agentResultP.then((chRe: void | ChatRequest) => {
           operate({
             type: 'update',
@@ -133,6 +131,7 @@ export function ChatPure({
   const [debugMode,setDebugMode]=useState(false)
 
   const displayMessages=merge(messages, ctx.cards, debugMode)
+  window.displayMessages=displayMessages
 
   return (
     <div className='overflow-scroll' style={{height:'100vh'}}>

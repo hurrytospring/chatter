@@ -4,11 +4,11 @@ import { CardMessage, Operation } from '../float-chatter/types'
 export function merge(
   messages: Message[],
   cards: CardMessage[],
-  debugMode: boolean,
+  debugMode: boolean
 ): CardMessage[] {
   let chatCards = []
   chatCards = messages.map(message => {
-    let status = '';
+    let status = ''
     return {
       ...message,
       type: 'Chat',
@@ -18,12 +18,21 @@ export function merge(
   })
   const arr: CardMessage[] = [...chatCards, ...cards]
   arr.sort((a, b) => {
-    const t1 = a.createdAt?.getTime() ?? 0;
-    const t2 = b.createdAt?.getTime() ?? 0;
-    return t1 - t2;
-})
+    const t1 = a.createdAt?.getTime() ?? 0
+    const t2 = b.createdAt?.getTime() ?? 0
+    return t1 - t2
+  })
   return arr.filter((card, index) => {
-    if(debugMode)return true;
-    return !['system','function_call'].includes(card.role)
+    // 调试模式全部展示
+    if (debugMode) return true
+    // 系统消息，和调function消息的不展示
+    if (['system', 'function'].includes(card.role)) {
+      return false
+    }
+    //function call 的回复不展示
+    if (card.function_call) {
+      return false
+    }
+    return true
   })
 }

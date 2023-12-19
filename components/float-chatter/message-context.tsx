@@ -1,7 +1,17 @@
-import React, { ReactChildren, ReactElement, createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  ReactChildren,
+  ReactElement,
+  createContext,
+  useContext,
+  useEffect,
+  useState
+} from 'react'
 import { CardMessage, CardMessageType, ContextValue, Operation } from './types'
-
-
+import {
+  ILoadingItemState,
+  ILoadingMessage
+} from './custom-code-block/loading-render'
+import { nanoid } from 'nanoid'
 
 const initialCardMessages: CardMessage[] = [] // 初始卡片列表为空
 
@@ -17,7 +27,9 @@ export const useCardMessageContext = () => {
   return context
 }
 
-export const CardMessageProvider: React.FC<{children:ReactElement}> = ({ children }) => {
+export const CardMessageProvider: React.FC<{ children: ReactElement }> = ({
+  children
+}) => {
   const [cardList, setCardMessageList] =
     useState<CardMessage[]>(initialCardMessages)
   const operate = (operation: Operation) => {
@@ -34,15 +46,68 @@ export const CardMessageProvider: React.FC<{children:ReactElement}> = ({ childre
         return updatedCardMessages
       }
       if (operation.type === 'add') {
-        console.log(77777,[...list, operation.data])
+        console.log(77777, [...list, operation.data])
         return [...list, operation.data]
       }
       return list
     })
   }
-
+  const addLoadingStep = (item: ILoadingItemState) => {
+    const curLoadingMsg: ILoadingMessage | undefined = cardList.findLast(
+      c => c.type === 'Loading'
+    )
+    if (curLoadingMsg) {
+      operate({
+        type: 'update',
+        data: {
+          ...curLoadingMsg,
+          customContent: [...curLoadingMsg.customContent, item]
+        }
+      })
+    } else {
+      operate({
+        type: 'add',
+        data: {
+          id: nanoid(),
+          type: 'Loading',
+          customContent: [item]
+        }
+      })
+    }
+  }
+  const finishLoadingStep = (id?: string) => {
+    const curLoadingMsg: ILoadingMessage | undefined = cardList.findLast(
+      c => c.type === 'Loading'
+    )
+    if (!id&&curLoadingMsg) {
+      curLoadingMsg.customContent = (curLoadingMsg?.customContent || []).map(
+        c => {
+          return { ...c, progress: 100 }
+        }
+      )
+      operate({
+        type: 'update',
+        data: {
+          ...curLoadingMsg
+        }
+      })
+      return
+    }
+    const curStep = curLoadingMsg?.customContent.findLast(c => c.id === id)
+    if (curStep) {
+      curStep.progress = 100
+      operate({
+        type: 'update',
+        data: {
+          ...curLoadingMsg
+        }
+      })
+    }
+  }
   return (
-    <Context.Provider value={{ cards: cardList, operate }}>
+    <Context.Provider
+      value={{ cards: cardList, operate, finishLoadingStep, addLoadingStep }}
+    >
       {children}
     </Context.Provider>
   )

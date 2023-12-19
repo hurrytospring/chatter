@@ -7,8 +7,7 @@ import DeviceUnknownIcon from '@mui/icons-material/DeviceUnknown';
 import { CardMessage } from '../types'
 import { LinearProgress } from '@mui/material';
 
-interface ILoadingMessage extends CardMessage{
-  content:ILoadingItemState[]
+export interface ILoadingMessage extends CardMessage<ILoadingItemState[]>{
 }
 interface IChatRenderProps {
   card: ILoadingMessage
@@ -21,7 +20,7 @@ interface SubAgentConfig{
   title:string,
   type:SubAgentType
 }
-interface ILoadingItemState {
+export interface ILoadingItemState {
   id:string,
   type:SubAgentType,
   progress:number
@@ -55,7 +54,7 @@ export const LoadingRender: FunctionComponent<IChatRenderProps> = props => {
   return (
     <div>
       <div>思考中...</div>
-      {card.content.map(c=>{
+      {card.customContent.map(c=>{
         const config=SubAgentLoadingConfigs[c.type];
         return <div>
         <div className='flex'>{config.icon} <div>{config.title}</div></div>
