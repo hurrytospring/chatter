@@ -1,6 +1,6 @@
 'use client'
 
-import { useChat, type Message } from 'ai/react'
+import { useChat } from 'ai/react'
 
 import { cn } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
@@ -16,30 +16,21 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { use, useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { toast } from 'react-hot-toast'
-import { usePathname, useRouter } from 'next/navigation'
-import { ChatRequest, FunctionCallHandler, nanoid } from 'ai'
-import {
-  pageCreatorFnDef,
-  usePageCreatorAgent
-} from '@/lib/hooks/use-page-creator'
-import {
-  CardMessageProvider,
-  useCardMessageContext
-} from '../float-chatter/message-context'
-import { FloatChatter } from '../float-chatter/float-chatter'
+import { ChatRequest } from 'ai'
+
+import { useCardMessageContext } from '../float-chatter/message-context'
 import { ChatProps } from './types'
-import { sysFnDef, useSysAgent } from '@/lib/hooks/use-sys-agent'
-import { useUniAgent } from '@/lib/hooks/use-uni-agent'
-import { dataAnasisAgentConfig } from '@/lib/hooks/use-data-anasis'
-import { CardMessage } from '../float-chatter/types'
-import { Switch, useStepContext } from '@mui/material'
+import { Switch } from '@mui/material'
 import { merge } from './chatUtil'
-import {dashboardFnDef,useDashboardAgent} from '@/lib/hooks/use-dashboard-agent'
-import { Label } from '@mui/icons-material'
+import {
+  MappingsFunction2LoadingMessageType,
+  useSubAgent
+} from '@/lib/hooks/use-sub-agent'
+import { nanoid } from 'nanoid'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 //TODO：改正这里的bad code
@@ -48,23 +39,16 @@ let ignore = false
 export function ChatPure({
   id,
   initialMessages,
-  className,
-  // setPageStatus
+  className // setPageStatus
 }: ChatProps) {
-  const router = useRouter()
-  const path = usePathname()
   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
     'ai-token',
     null
   )
   const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
-  const { operate } = useCardMessageContext()
-  const pageCreatorAgentHandle = usePageCreatorAgent(operate)
-  const sysAgentHandle = useSysAgent(operate)
-  const dataAnasisAgentHandle = useUniAgent(dataAnasisAgentConfig)
-  const dashboardAgentHandle = useDashboardAgent(operate)
 
+  const { callHandler, functions } = useSubAgent()
   //注意默认隐藏初始信息
   const iniMessageNum = initialMessages?.length || 0
   const { messages, append, reload, stop, isLoading, input, setInput } =
@@ -75,68 +59,42 @@ export function ChatPure({
       body: {
         id,
         previewToken,
-        modelConfig: { functions: [pageCreatorFnDef,sysFnDef,dataAnasisAgentConfig.outFnDef,dashboardFnDef] }
+        modelConfig: { functions: [...functions] }
       },
       onResponse(response) {
         if (response.status === 401) {
           toast.error(response.statusText)
         }
       },
-      onFinish() {
-        // if (!path.includes('chat')) {
-        //   router.push(`/chat/${id}`, { shallow: true })
-        //   router.refresh()
-        // }
-      },
+      onFinish() {},
       experimental_onFunctionCall: (chatMessages, functionCall) => {
+        const call = callHandler(chatMessages, functionCall)
+        if (!call) throw new Error(`没有匹配到函数，${functionCall.name}`)
+        const { matchFunction, callResult } = call
         console.log('————————calling function————————,', functionCall)
-        //设定loading
-        const id = nanoid()
-        
-        operate({
-          type: 'add',
-          data: {
-            id: id,
-            customContent: [],
-            type: 'Loading',
-            createdAt: new Date()
-          }
+        ctx.addLoadingStep({
+          type:
+            MappingsFunction2LoadingMessageType[functionCall.name ?? ''] ??
+            'UNKNOWN',
+          id: nanoid(),
+          progress: 0
         })
-        let agentResultP: Promise<void | ChatRequest>
-        if (pageCreatorAgentHandle.assert(functionCall)) {
-          agentResultP = pageCreatorAgentHandle(chatMessages, functionCall)
-        } else if (sysAgentHandle.assert(functionCall)) {
-          agentResultP = sysAgentHandle(chatMessages, functionCall)
-        } else if (dataAnasisAgentHandle.assert(functionCall)) {
-          agentResultP = dataAnasisAgentHandle(chatMessages, functionCall)
-        }else if(dashboardAgentHandle.assert(functionCall)){
-          agentResultP = dashboardAgentHandle(chatMessages,functionCall)
-        } else {
-          agentResultP = new Promise(() => {})
-        }
-        // 这里要把消息update上去实在是不方便，就把loading隐藏了吧
-        agentResultP.then((chRe: void | ChatRequest) => {
-          operate({
-            type: 'update',
-            data: {
-              id: id,
-              hidden: true
-            }
-          })
+        callResult.then((chRe: void | ChatRequest) => {
+          ctx.finishLoadingStep()
         })
-        return agentResultP
+        return callResult
       }
     })
   const ctx = useCardMessageContext()
-  const [debugMode,setDebugMode]=useState(false)
+  const [debugMode, setDebugMode] = useState(false)
 
-  const displayMessages=merge(messages, ctx.cards, debugMode)
-  window.displayMessages=displayMessages
+  const displayMessages = merge(messages, ctx.cards, debugMode)
+  window.displayMessages = displayMessages
 
   return (
-    <div className='overflow-scroll' style={{height:'100vh'}}>
+    <div className="overflow-scroll" style={{ height: '100vh' }}>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
-        {messages.length ? (
+        {displayMessages.length ? (
           <>
             <ChatList
               messages={displayMessages}
@@ -158,8 +116,13 @@ export function ChatPure({
         input={input}
         setInput={setInput}
       />
-      <div  className='absolute bottom-10'>
-      <Switch checked={debugMode} onChange={(_,v)=>setDebugMode(v)} aria-label='debugMode'></Switch></div>
+      <div className="absolute bottom-10">
+        <Switch
+          checked={debugMode}
+          onChange={(_, v) => setDebugMode(v)}
+          aria-label="debugMode"
+        ></Switch>
+      </div>
       <Dialog open={previewTokenDialog} onOpenChange={setPreviewTokenDialog}>
         <DialogContent>
           <DialogHeader>

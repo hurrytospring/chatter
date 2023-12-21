@@ -18,6 +18,6 @@ export  interface ContextValue {
     cards: CardMessage[]
     operate: (op: Operation) => void
     addLoadingStep: (item: ILoadingItemState) => void
-    finishLoadingStep: (id: string) => void
+    finishLoadingStep: (id?: string) => void
   }
  export type Operator= (operation: Operation) => void

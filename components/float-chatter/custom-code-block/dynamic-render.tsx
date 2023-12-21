@@ -1,3 +1,5 @@
+'use client'
+
 import { runCodeSync } from '@/app/code_runner'
 import * as MUI from '@mui/material'
 import React, { useState, ReactElement, ComponentType, FunctionComponent } from 'react'
@@ -33,6 +35,8 @@ const DynamicRenderPure: FunctionComponent<IDynamicRenderProps> = (
   props: IDynamicRenderProps
 ) => {
   const { card } = props
-  return runCodeSync(card.content, { MUI, React, BaseAISDK }) as JSX.Element
+  const jsCode = Babel.transform(card.content, { presets: ["react"] }).code;
+  console.log(8888,jsCode)
+  return runCodeSync(jsCode, { MUI, React, BaseAISDK }) as JSX.Element
 }
 export const DynamicRender = withError(DynamicRenderPure)

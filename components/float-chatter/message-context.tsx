@@ -52,61 +52,44 @@ export const CardMessageProvider: React.FC<{ children: ReactElement }> = ({
       return list
     })
   }
+  const [isWaittingExternal, setIsWaittingExternal] = useState(false)
+  const [loadingSteps, setLoadingSteps] = useState<ILoadingItemState[]>([])
   const addLoadingStep = (item: ILoadingItemState) => {
-    const curLoadingMsg: ILoadingMessage | undefined = cardList.findLast(
-      c => c.type === 'Loading'
-    )
-    if (curLoadingMsg) {
-      operate({
-        type: 'update',
-        data: {
-          ...curLoadingMsg,
-          customContent: [...curLoadingMsg.customContent, item]
-        }
-      })
-    } else {
-      operate({
-        type: 'add',
-        data: {
-          id: nanoid(),
-          type: 'Loading',
-          customContent: [item]
-        }
-      })
-    }
+    setIsWaittingExternal(true)
+    setLoadingSteps(s => [...s, item])
   }
   const finishLoadingStep = (id?: string) => {
-    const curLoadingMsg: ILoadingMessage | undefined = cardList.findLast(
-      c => c.type === 'Loading'
-    )
-    if (!id&&curLoadingMsg) {
-      curLoadingMsg.customContent = (curLoadingMsg?.customContent || []).map(
-        c => {
-          return { ...c, progress: 100 }
-        }
-      )
-      operate({
-        type: 'update',
-        data: {
-          ...curLoadingMsg
-        }
-      })
+    if (!id) {
+      setIsWaittingExternal(false)
+      setLoadingSteps([])
       return
     }
-    const curStep = curLoadingMsg?.customContent.findLast(c => c.id === id)
-    if (curStep) {
-      curStep.progress = 100
-      operate({
-        type: 'update',
-        data: {
-          ...curLoadingMsg
+    setLoadingSteps(s =>
+      s.map(step => {
+        if (step.id === id) {
+          step.progress = 100
+          return step
         }
+        return step
       })
-    }
+    )
   }
+  const loadingMessage: ILoadingMessage = {
+    type: 'Loading',
+    customContent: loadingSteps,
+    id: nanoid(),
+    sender: '',
+    status: 'pending',
+    content: '',
+    role: 'assistant',
+  }
+  const mixedCard: CardMessage[] = [
+    ...cardList,
+    ...(isWaittingExternal ? [loadingMessage] : [])
+  ]
   return (
     <Context.Provider
-      value={{ cards: cardList, operate, finishLoadingStep, addLoadingStep }}
+      value={{ cards: mixedCard, operate, finishLoadingStep, addLoadingStep }}
     >
       {children}
     </Context.Provider>
