@@ -12,8 +12,8 @@ dependencies:
     specifier: ^11.11.0
     version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.42)(react@18.2.0)
   '@lark-base-open/js-sdk':
-    specifier: ^0.3.4
-    version: 0.3.5
+    specifier: https://lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.3.6-alpha.4.tgz
+    version: '@lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.3.6-alpha.4.tgz'
   '@mui/material':
     specifier: ^5.14.18
     version: 5.14.20(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0)
@@ -582,10 +582,6 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
-
-  /@lark-base-open/js-sdk@0.3.5:
-    resolution: {integrity: sha512-z7H/+c8r8hfnkny6R+Xd85/58F0bRBf9T2nDc6080axHrH0cTFk3mo+eM3MKyu2xDOEcckmNPoHu25LQPPS9kQ==}
-    dev: false
 
   /@mui/base@5.0.0-beta.26(@types/react@18.2.42)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-gPMRKC84VRw+tjqYoyBzyrBUqHQucMXdlBpYazHa5rCXrb91fYEQk5SqQ2U5kjxx9QxZxTBvWAmZ6DblIgaGhQ==}
@@ -6978,4 +6974,18 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
+    dev: false
+
+  '@lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.3.6-alpha.2.tgz':
+    resolution: {tarball: https://lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.3.6-alpha.2.tgz}
+    name: '@lark-base-open/js-sdk'
+    version: 0.3.6-alpha.2
+    dev: false
+
+  '@lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.3.6-alpha.4.tgz':
+    resolution: {tarball: https://lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.3.6-alpha.4.tgz}
+    name: '@lark-base-open/js-sdk'
+    version: 0.3.6-alpha.4
+    dependencies:
+      '@lark-base-open/js-sdk': '@lf3-static.bytednsdoc.com/obj/eden-cn/jjjpceh7nulojvhj/@lark-base-open-js-sdk-0.3.6-alpha.2.tgz'
     dev: false

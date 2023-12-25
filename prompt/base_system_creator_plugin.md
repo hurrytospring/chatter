@@ -16,16 +16,13 @@ const FieldMetaList =  await BaseAISDK.getFieldMetaList();
 示例
 const tableId = await BaseAISDK.addTable("家庭成员表")
 
-### 在指定数据表中新增字段字段,新增成功后返回 FieldID  addField: (tableid:string,name:string,type:string) => Promise<FieldId>; type参数的选择有如下类型："文本"、"单选"、"多选"、"链接"、"时间"、"创建时间"、"更新时间"、"评分"、"进度"、"邮箱"、"附件"，调用函数时请在这其中严格选择合适的类型，不要自己创造新类型。
+### 在指定数据表中新增字段字段,新增成功后返回 FieldID  addField: (tableid:string,name:string,type:string) => Promise<FieldId>; type参数的选择有如下类型："文本"、"数字"、"单选"、"多选"、"链接"、"时间"、"创建时间"、"更新时间"、"评分"、"进度"、"邮箱"、"附件"，调用函数时请在这其中严格选择合适的类型，不要自己创造新类型。
 ```typescript
 type FieldId = string;
 ```
 示例
 const FieldId =  await BaseAISDK.addField("tableID","姓名","文本");
 
-
-
-  
 
 ### 获取当前数据表中指定数量的记录 getRecords: ()=> Promise<IGetRecordsResponse>
 示例

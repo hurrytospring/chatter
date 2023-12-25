@@ -1,0 +1,995 @@
+{
+    "AddRecordTrigger": {
+        "name": "AddRecordTrgger",
+        "description": "The trigger is fired when a new record is added to the table and, and the value of the field is not empty and the record meets some specific condition.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "TableName": {
+                    "type": "string",
+                    "description": "The name of the table that the record is added to."
+                },
+                "FieldName": {
+                    "type": "string",
+                    "description": "The name of the field that cannot be empty."
+                },
+                "SetConstraint": {
+                    "type": "array",
+                    "description": "The condition that the new record must meet. The condition is satisfied when any of the constraint in the array is satisfied.",
+                    "items": {
+                        "type": "array",
+                        "description": "The constraint is satisfied when all of the conditions in the array is satisfied.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "FieldName": {
+                                    "type": "string",
+                                    "description": "The name of the field that the condition is based on."
+                                },
+                                "Operator": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Is",
+                                        "IsNot",
+                                        "Contains",
+                                        "ContainText",
+                                        "DoesNotContain",
+                                        "IsEmpty",
+                                        "IsNotEmpty",
+                                        "IsGreater",
+                                        "IsGreaterEqual",
+                                        "IsLess",
+                                        "IsLessEqual",
+                                        "Any"
+                                    ],
+                                    "description": "The operator of the condition."
+                                },
+                                "Value": {
+                                    "type": "string",
+                                    "description": "The value of the condition. \"Any\" if the operator is \"Any\"."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "TableName",
+                "FieldName"
+            ]
+        }
+    },
+    "UpdateRecordTrigger": {
+        "name": "UpdateRecordTrigger",
+        "description": "The trigger is fired when a record chosen is updated and the updated record meets some specific condition.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "TableName": {
+                    "type": "string",
+                    "description": "The name of the table that the record is updated in."
+                },
+                "Scope": {
+                    "type": "string",
+                    "enum": [
+                        "All",
+                        "Selected"
+                    ],
+                    "description": "The scope of the trigger. If the scope is set to \"All\", the trigger is fired when any record in the table is updated. If the scope is set to \"Selected\", the trigger is fired when the record chosen is updated."
+                },
+                "ScopeConstraint": {
+                    "type": "array",
+                    "description": "The constraint for the record chosen.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "FieldName": {
+                                "type": "string",
+                                "description": "The name of the field that the condition is based on."
+                            },
+                            "Operator": {
+                                "type": "string",
+                                "enum": [
+                                    "Is",
+                                    "IsNot",
+                                    "Contains",
+                                    "ContainText",
+                                    "DoesNotContain",
+                                    "IsEmpty",
+                                    "IsNotEmpty",
+                                    "IsGreater",
+                                    "IsGreaterEqual",
+                                    "IsLess",
+                                    "IsLessEqual",
+                                    "Any"
+                                ],
+                                "description": "The operator of the condition."
+                            },
+                            "Value": {
+                                "type": "string",
+                                "description": "The value of the condition. \"Any\" if the operator is \"Any\"."
+                            }
+                        }
+                    }
+                },
+                "UpdatedConstraint": {
+                    "type": "array",
+                    "description": "The constraint that the updated field of the updated record should meet.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "FieldName": {
+                                "type": "string",
+                                "description": "the name of the field that the condition is based on."
+                            },
+                            "Operator": {
+                                "type": "string",
+                                "enum": [
+                                    "Is",
+                                    "IsNot",
+                                    "Contains",
+                                    "ContainText",
+                                    "DoesNotContain",
+                                    "IsEmpty",
+                                    "IsNotEmpty",
+                                    "IsGreater",
+                                    "IsGreaterEqual",
+                                    "IsLess",
+                                    "IsLessEqual",
+                                    "Any"
+                                ],
+                                "description": "The operator of the condition."
+                            },
+                            "Value": {
+                                "type": "string",
+                                "description": "The value of the condition. \"Any\" if the operator is \"Any\"."
+                            }
+                        }
+                    }
+                },
+                "SetConstraint": {
+                    "type": "array",
+                    "description": "The condition that the updated record must meet. The condition is satisfied when any of the constraint in the array is satisfied.",
+                    "items": {
+                        "type": "array",
+                        "description": "The constraint is satisfied when all of the conditions in the array is satisfied.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "FieldName": {
+                                    "type": "string",
+                                    "description": "The name of the field that the condition is based on."
+                                },
+                                "Operator": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Is",
+                                        "IsNot",
+                                        "Contains",
+                                        "ContainText",
+                                        "DoesNotContain",
+                                        "IsEmpty",
+                                        "IsNotEmpty",
+                                        "IsGreater",
+                                        "IsGreaterEqual",
+                                        "IsLess",
+                                        "IsLessEqual",
+                                        "Any"
+                                    ],
+                                    "description": "The operator of the condition."
+                                },
+                                "Value": {
+                                    "type": "string",
+                                    "description": "The value of the condition. \"Any\" if the operator is \"Any\"."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "TableName",
+                "Scope",
+                "UpdatedConstraint"
+            ]
+        }
+    },
+    "SetRecordTrigger": {
+        "name": "SetRecordTrigger",
+        "description": "The trigger is fired when the record in the table meet the specific condition.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "TableName": {
+                    "type": "string",
+                    "description": "The name of the table that the record is in."
+                },
+                "SetConstraint": {
+                    "type": "array",
+                    "description": "The condition that the record in the table must meet. The condition is satisfied when any of the constraint in the array is satisfied.",
+                    "items": {
+                        "type": "array",
+                        "description": "The constraint is satisfied when all of the conditions in the array is satisfied.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "FieldName": {
+                                    "type": "string",
+                                    "description": "The name of the field that the condition is based on."
+                                },
+                                "Operator": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Is",
+                                        "IsNot",
+                                        "Contains",
+                                        "ContainText",
+                                        "DoesNotContain",
+                                        "IsEmpty",
+                                        "IsNotEmpty",
+                                        "IsGreater",
+                                        "IsGreaterEqual",
+                                        "IsLess",
+                                        "IsLessEqual",
+                                        "Any"
+                                    ],
+                                    "description": "The operator of the condition."
+                                },
+                                "Value": {
+                                    "type": "string",
+                                    "description": "The value of the condition. \"Any\" if the operator is \"Any\"."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "TableName",
+                "SetConstraint"
+            ]
+        }
+    },
+    "ReminderTrigger": {
+        "name": "ReminderTrigger",
+        "description": "The trigger is fired when the time reaches relative to the time saved in the field and the record in the table meet the specific condition.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "TableName": {
+                    "type": "string",
+                    "description": "The name of the table that the record is in."
+                },
+                "FieldName": {
+                    "type": "string",
+                    "description": "The name of the field that the time is saved in."
+                },
+                "Offset": {
+                    "type": "interger",
+                    "description": "The offset of the trigger relative to the date saved in the field."
+                },
+                "OffsetUnit": {
+                    "type": "string",
+                    "enum": [
+                        "MINUTE",
+                        "HOUR",
+                        "DAY",
+                        "WEEK",
+                        "MONTH"
+                    ],
+                    "description": "The unit of the offset."
+                },
+                "Time": {
+                    "type": "string",
+                    "description": "The time of the trigger filed in the format of \"HH:mm\"."
+                },
+                "SetConstraint": {
+                    "type": "array",
+                    "description": "The condition that the record in the table must meet at the time. The condition is satisfied when any of the constraint in the array is satisfied.",
+                    "items": {
+                        "type": "array",
+                        "description": "The constraint is satisfied when all of the conditions in the array is satisfied.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "FieldName": {
+                                    "type": "string",
+                                    "description": "The name of the field that the condition is based on."
+                                },
+                                "Operator": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Is",
+                                        "IsNot",
+                                        "Contains",
+                                        "ContainText",
+                                        "DoesNotContain",
+                                        "IsEmpty",
+                                        "IsNotEmpty",
+                                        "IsGreater",
+                                        "IsGreaterEqual",
+                                        "IsLess",
+                                        "IsLessEqual",
+                                        "Any"
+                                    ],
+                                    "description": "The operator of the condition."
+                                },
+                                "Value": {
+                                    "type": "string",
+                                    "description": "The value of the condition. \"Any\" if the operator is \"Any\"."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "TableName",
+                "FieldName",
+                "Offset",
+                "OffsetUnit",
+                "Time"
+            ]
+        }
+    },
+    "TimerTrigger": {
+        "name": "TimerTrigger",
+        "description": "The trigger is fired when the time is up, which can be repeated, and the condition should be met at the time.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "StartTime": {
+                    "type": "string",
+                    "description": "The start time of the timer in the format of \"yyyy-MM-dd HH:mm\"."
+                },
+                "RepeatRule": {
+                    "type": "string",
+                    "enum": [
+                        "NO_REPEAT",
+                        "HOURLY",
+                        "DAILY",
+                        "WEEKLY",
+                        "MONTHLY",
+                        "YEARLY",
+                        "CUSTOM",
+                        "WORKDAY"
+                    ],
+                    "description": "The repeat rule of the timer."
+                },
+                "CustomRule": {
+                    "type": "object",
+                    "description": "The rule of the timer when the repeat rule is set to \"CUSTOM\".",
+                    "properties": {
+                        "IntervalTime": {
+                            "type": "integer",
+                            "description": "The interval time of the timer."
+                        },
+                        "IntervalUnit": {
+                            "type": "string",
+                            "enum": [
+                                "HOUR",
+                                "DAY",
+                                "WEEK",
+                                "MONTH",
+                                "YEAR"
+                            ],
+                            "description": "The unit of the interval time."
+                        },
+                        "SubUnit": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "description": "The sub unit of the timer. If the intervalUnit is \"WEEK\", subUnit can be some of the following: [1, 2, 3, 4, 5, 6, 7]; If the intervalUnit is \"MONTH\", subUnit can be some of the following: [1, 2, 3, ..., 31]"
+                            },
+                            "description": "The sub unit of the timer."
+                        },
+                        "EndTime": {
+                            "type": "string",
+                            "description": "The end time of the timer in the format of \"yyyy-MM-dd HH:mm\"."
+                        }
+                    }
+                },
+                "SetTimeCondition": {
+                    "type": "object",
+                    "description": "The condition is satisfied when the time is under the constraint, in addition to the RepeatRule.",
+                    "properties": {
+                        "Operator": {
+                            "type": "string",
+                            "enum": [
+                                "Is",
+                                "IsAfter",
+                                "IsBefore"
+                            ],
+                            "description": "The operator of the condition."
+                        },
+                        "Date": {
+                            "type": "string",
+                            "description": "The date of the condition in the format of \"yyyy-MM-dd\"."
+                        }
+                    }
+                }
+            },
+            "required": [
+                "StartTime",
+                "RepeatRule"
+            ]
+        }
+    },
+    "ButtonTrigger": {
+        "name": "ButtonTrigger",
+        "description": "The trigger is fired when the button is clicked. And the record in the table meet the specific condition.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "TableName": {
+                    "type": "string",
+                    "description": "The name of the table that the record is in."
+                },
+                "FieldName": {
+                    "type": "string",
+                    "description": "The name of the field that the button is in."
+                },
+                "SetConstraint": {
+                    "type": "array",
+                    "description": "The condition that the record in the table must meet. The condition is satisfied when any of the constraint in the array is satisfied.",
+                    "items": {
+                        "type": "array",
+                        "description": "The constraint is satisfied when all of the conditions in the array is satisfied.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "FieldName": {
+                                    "type": "string",
+                                    "description": "The name of the field that the condition is based on."
+                                },
+                                "Operator": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Is",
+                                        "IsNot",
+                                        "Contains",
+                                        "ContainText",
+                                        "DoesNotContain",
+                                        "IsEmpty",
+                                        "IsNotEmpty",
+                                        "IsGreater",
+                                        "IsGreaterEqual",
+                                        "IsLess",
+                                        "IsLessEqual",
+                                        "Any"
+                                    ],
+                                    "description": "The operator of the condition."
+                                },
+                                "Value": {
+                                    "type": "string",
+                                    "description": "The value of the condition. \"Any\" if the operator is \"Any\"."
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "TableName",
+                "FieldName"
+            ]
+        }
+    },
+    "AddRecordAction": {
+        "name": "AddRecordAction",
+        "description": "The action is used to add a new record to the table.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "TableName": {
+                    "type": "string",
+                    "description": "The name of the table that the record is added to."
+                },
+                "FieldValue": {
+                    "type": "array",
+                    "description": "The value of the fields in the new record.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "FieldName": {
+                                "type": "string",
+                                "description": "The name of the field that the value is set to."
+                            },
+                            "Value": {
+                                "type": "object",
+                                "description": "The value of the field.",
+                                "properties": {
+                                    "Kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Const",
+                                            "Reference"
+                                        ]
+                                    },
+                                    "Const": {
+                                        "type": "string",
+                                        "description": "The constant value of the field. If the kind is \"Const\", the value should be set to the constant value of the field."
+                                    },
+                                    "Reference": {
+                                        "type": "object",
+                                        "description": "The reference is used to refer to the value of the field in one subtask. If the kind is \"Reference\", the value should be set to the reference.",
+                                        "properties": {
+                                            "Subtask": {
+                                                "type": "string",
+                                                "description": "The subtask that the field is in. Subtask should be one of the following: \"Trigger\", \"Action1\", \"Action2\", ..."
+                                            },
+                                            "FieldName": {
+                                                "type": "string",
+                                                "description": "The name of the field that the value is referred to. \"Any\" means the whole record in the subtask."
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "Kind"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "TableName",
+                "FieldValue"
+            ]
+        }
+    },
+    "UpdateRecordAction": {
+        "name": "UpdateRecordAction",
+        "description": "The action is used to update the record in the table chosen.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "TableName": {
+                    "type": "string",
+                    "description": "The name of the table that the record is updated in."
+                },
+                "Scope": {
+                    "type": "string",
+                    "enum": [
+                        "All",
+                        "Selected"
+                    ],
+                    "description": "The scope of the action. If the scope is set to \"All\", the action is used to update all the records in the table. If the scope is set to \"Selected\", the action is used to update the record chosen."
+                },
+                "ScopeConstraint": {
+                    "type": "array",
+                    "description": "The constraint for the record chosen.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "FieldName": {
+                                "type": "string",
+                                "description": "The name of the field that the condition is based on."
+                            },
+                            "Operator": {
+                                "type": "string",
+                                "enum": [
+                                    "Is",
+                                    "IsNot",
+                                    "Contains",
+                                    "ContainText",
+                                    "DoesNotContain",
+                                    "IsEmpty",
+                                    "IsNotEmpty",
+                                    "IsGreater",
+                                    "IsGreaterEqual",
+                                    "IsLess",
+                                    "IsLessEqual",
+                                    "Any"
+                                ],
+                                "description": "The operator of the condition."
+                            },
+                            "Value": {
+                                "type": "object",
+                                "description": "The value of the field.",
+                                "properties": {
+                                    "Kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Const",
+                                            "Reference"
+                                        ]
+                                    },
+                                    "Const": {
+                                        "type": "string",
+                                        "description": "The constant value of the field. If the kind is \"Const\", the value should be set to the constant value of the field."
+                                    },
+                                    "Reference": {
+                                        "type": "object",
+                                        "description": "The reference is used to refer to the value of the field in one subtask. If the kind is \"Reference\", the value should be set to the reference.",
+                                        "properties": {
+                                            "Subtask": {
+                                                "type": "string",
+                                                "description": "The subtask that the field is in. Subtask should be one of the following: \"Trigger\", \"Action1\", \"Action2\", ..."
+                                            },
+                                            "FieldName": {
+                                                "type": "string",
+                                                "description": "The name of the field that the value is referred to. \"Any\" means the whole record in the subtask."
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "Kind"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "FieldValue": {
+                    "type": "array",
+                    "description": "The value of the fields in the updated record.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "FieldName": {
+                                "type": "string",
+                                "description": "The name of the field that the value is set to."
+                            },
+                            "Value": {
+                                "type": "object",
+                                "description": "The value of the field.",
+                                "properties": {
+                                    "Kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Const",
+                                            "Reference"
+                                        ]
+                                    },
+                                    "Const": {
+                                        "type": "string",
+                                        "description": "The constant value of the field. If the kind is \"Const\", the value should be set to the constant value of the field."
+                                    },
+                                    "Reference": {
+                                        "type": "object",
+                                        "description": "The reference is used to refer to the value of the field in one subtask. If the kind is \"Reference\", the value should be set to the reference.",
+                                        "properties": {
+                                            "Subtask": {
+                                                "type": "string",
+                                                "description": "The subtask that the field is in. Subtask should be one of the following: \"Trigger\", \"Action1\", \"Action2\", ..."
+                                            },
+                                            "FieldName": {
+                                                "type": "string",
+                                                "description": "The name of the field that the value is referred to. \"Any\" means the whole record in the subtask."
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "Kind"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "TableName",
+                "Scope",
+                "FieldValue"
+            ]
+        }
+    },
+    "FindRecordAction": {
+        "name": "FindRecordAction",
+        "description": "Find the field of record in the scope.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "TableName": {
+                    "type": "string",
+                    "description": "The name of the table that the record is in."
+                },
+                "ScopeConstraint": {
+                    "type": "array",
+                    "description": "The constraint for the record chosen.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "FieldName": {
+                                "type": "string",
+                                "description": "The name of the field that the condition is based on."
+                            },
+                            "Operator": {
+                                "type": "string",
+                                "enum": [
+                                    "Is",
+                                    "IsNot",
+                                    "Contains",
+                                    "ContainText",
+                                    "DoesNotContain",
+                                    "IsEmpty",
+                                    "IsNotEmpty",
+                                    "IsGreater",
+                                    "IsGreaterEqual",
+                                    "IsLess",
+                                    "IsLessEqual",
+                                    "Any"
+                                ],
+                                "description": "The operator of the condition."
+                            },
+                            "Value": {
+                                "type": "object",
+                                "description": "The value of the field.",
+                                "properties": {
+                                    "Kind": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Const",
+                                            "Reference"
+                                        ]
+                                    },
+                                    "Const": {
+                                        "type": "string",
+                                        "description": "The constant value of the field. If the kind is \"Const\", the value should be set to the constant value of the field."
+                                    },
+                                    "Reference": {
+                                        "type": "object",
+                                        "description": "The reference is used to refer to the value of the field in one subtask. If the kind is \"Reference\", the value should be set to the reference.",
+                                        "properties": {
+                                            "Subtask": {
+                                                "type": "string",
+                                                "description": "The subtask that the field is in. Subtask should be one of the following: \"Trigger\", \"Action1\", \"Action2\", ..."
+                                            },
+                                            "FieldName": {
+                                                "type": "string",
+                                                "description": "The name of the field that the value is referred to. \"Any\" means the whole record in the subtask."
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "Kind"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "FieldNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "The name of the fields to find."
+                    },
+                    "description": "The name of the fields to find."
+                },
+                "EndIfNotFound": {
+                    "type": "boolean",
+                    "description": "If the value is set to true, the workflow will end if the record is not found. If the value is set to false, the workflow will continue if the record is not found."
+                }
+            },
+            "required": [
+                "TableName",
+                "ScopeConstraint",
+                "FieldNames",
+                "EndIfNotFound"
+            ]
+        }
+    },
+    "DelayAction": {
+        "name": "DelayAction",
+        "description": "The action is used to delay the workflow for a period of time.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "DelayTime": {
+                    "type": "integer",
+                    "description": "The delay time of the action."
+                },
+                "DelayUnit": {
+                    "type": "string",
+                    "enum": [
+                        "SECOND",
+                        "MINUTE",
+                        "HOUR"
+                    ],
+                    "description": "The unit of the delay time."
+                }
+            },
+            "required": [
+                "DelayTime",
+                "DelayUnit"
+            ]
+        }
+    },
+    "SendMessageWithButtonsAction": {
+        "name": "SendMessageWithButtonsAction",
+        "description": "Send a message card to the sender.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "Sender": {
+                    "type": "string",
+                    "description": "The sender of the message card. The sender can be one of the following: \"Assistant\", \"Self\", \"<String>\". \"Assistant\" is the default sender, if user does not set the sender.\"Self\" means the sender is the user who starts the workflow."
+                },
+                "Receivers": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "description": "The receiver of the message card.",
+                        "properties": {
+                            "ReceiverName": {
+                                "type": "string",
+                                "description": "The name of the receiver. The receiver name can be one of the following: \"Self\", \"<String>\". \"Self\" means the receiver is the user who starts the workflow."
+                            },
+                            "ReceiverGroup": {
+                                "type": "string",
+                                "description": "The group of the receiver. The receiver group can be one of the following: \"Self\", \"<String>\". \"Self\" means the receiver is the user who starts the workflow."
+                            }
+                        }
+                    }
+                },
+                "Title": {
+                    "type": "object",
+                    "description": "The title of the message card.",
+                    "properties": {
+                        "TemplateColor": {
+                            "type": "string",
+                            "enum": [
+                                "NONE",
+                                "BLUE",
+                                "WATHET",
+                                "TURQUOISE",
+                                "GREEN",
+                                "YELLOW",
+                                "ORANGE",
+                                "RED",
+                                "CARMINE",
+                                "VIOLET",
+                                "PURPLE",
+                                "INDIGO",
+                                "GREY"
+                            ],
+                            "description": "The color of the title template. PURPLE is the default template color, if user does not set the template color."
+                        },
+                        "TitleContent": {
+                            "type": "string",
+                            "description": "The content of the title."
+                        }
+                    }
+                },
+                "Content": {
+                    "type": "array",
+                    "description": "The content of the message card.",
+                    "items": {
+                        "type": "object",
+                        "description": "The content of the message card.",
+                        "properties": {
+                            "Kind": {
+                                "type": "string",
+                                "enum": [
+                                    "Const",
+                                    "Reference"
+                                ]
+                            },
+                            "Const": {
+                                "type": "string",
+                                "description": "The constant value of the field. If the kind is \"Const\", the value should be set to the constant value of the field."
+                            },
+                            "Reference": {
+                                "type": "object",
+                                "description": "The reference is used to refer to the value of the field in one subtask. If the kind is \"Reference\", the value should be set to the reference.",
+                                "properties": {
+                                    "Subtask": {
+                                        "type": "string",
+                                        "description": "The subtask that the field is in. Subtask should be one of the following: \"Trigger\", \"Action1\", \"Action2\", ..."
+                                    },
+                                    "FieldName": {
+                                        "type": "string",
+                                        "description": "The name of the field that the value is referred to. \"Any\" means the whole record in the subtask."
+                                    }
+                                }
+                            }
+                        },
+                        "required": [
+                            "Kind"
+                        ]
+                    }
+                },
+                "Buttons": {
+                    "type": "array",
+                    "description": "The buttons of the message card.",
+                    "items": {
+                        "type": "object",
+                        "description": "The button of the message card.",
+                        "properties": {
+                            "ButtonName": {
+                                "type": "string",
+                                "description": "The name of the button."
+                            },
+                            "LinkTo": {
+                                "type": "object",
+                                "description": "The link of the button. When click the button, the link will be opened.",
+                                "properties": {
+                                    "Subtask": {
+                                        "type": "string",
+                                        "description": "The subtask that the field is in. Subtask should be one of the following: \"Trigger\", \"Action1\", \"Action2\", ..."
+                                    },
+                                    "FieldName": {
+                                        "type": "string",
+                                        "description": "The name of the field that the value is referred to. \"Any\" means the whole record in the subtask."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "Sender",
+                "Receivers",
+                "Title",
+                "Content"
+            ]
+        }
+    },
+    "HTTPClientAction": {
+        "name": "HTTPClientAction",
+        "description": "Send a HTTP request",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "Method": {
+                    "type": "string",
+                    "enum": [
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "PATCH"
+                    ],
+                    "description": "The method of the HTTP request."
+                },
+                "URL": {
+                    "type": "string",
+                    "description": "The URL of the HTTP request."
+                },
+                "Query": {
+                    "type": "array",
+                    "description": "The query of the HTTP request.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Key": {
+                                "type": "string",
+                                "description": "The key of the query."
+                            },
+                            "Value": {
+                                "type": "string",
+                                "description": "The value of the query."
+                            }
+                        }
+                    }
+                },
+                "Header": {
+                    "type": "array",
+                    "description": "The header of the HTTP request.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Key": {
+                                "type": "string",
+                                "description": "The key of the header."
+                            },
+                            "Value": {
+                                "type": "string",
+                                "description": "The value of the header."
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "Method",
+                "URL"
+            ]
+        }
+    }
+}

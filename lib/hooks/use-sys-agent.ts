@@ -33,7 +33,7 @@ const initialMessages: Message[] = [
     role: 'system',
     content: prompt,
     id: nanoid(),
-    createdAt:new Date()
+    createdAt: new Date()
   }
 ]
 
@@ -44,6 +44,7 @@ export const useSysAgent = (operate: Operator) => {
     body: {
       modelConfig: {
         model: 'gpt-4-1106-preview',
+        // model: 'gpt-3.5-turbo',
         functions: [codeGeneratorDef]
       }
     },
@@ -71,11 +72,8 @@ export const useSysAgent = (operate: Operator) => {
             id: nanoid(),
             name: 'run_javascript_code',
             role: 'function' as const,
-            // content: JSON.stringify({
-            //   result
-            // })
-            createdAt:new Date(),
-            content: result
+            content: result,
+            createdAt: new Date(),
           }
         ]
       }
@@ -84,7 +82,7 @@ export const useSysAgent = (operate: Operator) => {
   })
 
 
-  const handleCall: FunctionCallHandler = async (chatMessages,functionCall) => {
+  const handleCall: FunctionCallHandler = async (chatMessages, functionCall) => {
     console.log('————————sysAgent is called———————\n', functionCall)
 
     const bgPrompt = `
@@ -97,20 +95,23 @@ export const useSysAgent = (operate: Operator) => {
       role: 'system',
       content: bgPrompt,
       id: nanoid(),
-      createdAt:new Date(),
+      createdAt: new Date(),
 
     } as const
 
     setMessages([
       bgMessage,
       ...initialMessages,
-      { role: 'user', content: functionCall.arguments || '', id: nanoid(),createdAt:new Date() }
+      { role: 'user', 
+      content: functionCall.arguments || '', 
+      id: nanoid(), 
+      createdAt: new Date() }
     ])
 
 
     console.log('————————new messages sysAgent got————————\n', JSON.stringify([
       bgMessage,
-      { role: 'user', content: functionCall.arguments || '', id: nanoid(),createdAt:new Date() }
+      { role: 'user', content: functionCall.arguments || '', id: nanoid(), createdAt: new Date() }
     ], null, 2))
 
     await reload()
@@ -128,7 +129,7 @@ export const useSysAgent = (operate: Operator) => {
         }
       ]
     } as ChatRequest
-  }; 
-  (handleCall as FunctionCallHandlerWithAssert).assert = (fn: FunctionCall) =>fn.name === fnKey
+  };
+  (handleCall as FunctionCallHandlerWithAssert).assert = (fn: FunctionCall) => fn.name === fnKey
   return handleCall as FunctionCallHandlerWithAssert
 }

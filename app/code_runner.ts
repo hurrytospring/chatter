@@ -19,7 +19,6 @@ const genStaticCode = (userCode: string, keys: string[]) => {
   }) 
 `
 }
-
 export async function runCode(userCode: string, ctx: Record<string, any>) {
   const keys = Object.keys(ctx)
   const code = genStaticCode(userCode, keys)
