@@ -2,7 +2,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { kv } from '@vercel/kv'
+import { createClient, kv } from '@vercel/kv'
 
 import { auth } from '@/install'
 import { type Chat } from '@/lib/types'
@@ -131,7 +131,7 @@ export interface IOpenSessionData {
 }
 export async function getAuthMetaById(baseId: string) {
   const authMeta: IOpenSessionData | null = await kv.get(`authMeta:${baseId}`)
-  console.log('mmmmmmmmmmmmeta',authMeta)
+  console.log('mmmmmmmmmmmmeta', authMeta)
   if (authMeta && authMeta.appToken && authMeta.personalBaseToken) {
     return authMeta
   }
@@ -267,6 +267,7 @@ export async function getFormData_page(tableName: string) {
 
 
 export async function getFieldsData_page(tableName: string) {
+  console.log('--------using onepage mode--------')
   const meta = await getAuthMeta();
   if (!meta?.personalBaseToken) throw new Error('no auth');
   const { appToken, personalBaseToken } = meta;
@@ -291,6 +292,7 @@ export async function getFieldsData_page(tableName: string) {
 }
 
 export async function getRecordsData_page(tableName: string) {
+  console.log('--------using onepage mode--------')
   const meta = await getAuthMeta();
   if (!meta?.personalBaseToken) throw new Error('no auth');
   const { appToken, personalBaseToken } = meta;
@@ -315,10 +317,45 @@ export async function getRecordsData_page(tableName: string) {
   return recordsData
 }
 
-export async function getCode(uuid: string) {
+export async function getCode(uuid: string): Promise<string> {
   console.log("uuid:", uuid);
   if (uuid == null) throw Error('no uuid!')
   const code = await kv.hmget(uuid, 'code')
   if (code == null) throw Error('no code!')
-  return code['code']
+  return code['code'] as string;
+}
+
+
+
+function uuid() {
+  var uuidValue = "", k, randomValue;
+  for (k = 0; k < 32; k++) {
+    randomValue = Math.random() * 16 | 0;
+
+    if (k == 8 || k == 12 || k == 16 || k == 20) {
+      uuidValue += "-"
+    }
+    uuidValue += (k == 12 ? 4 : (k == 16 ? (randomValue & 3 | 8) : randomValue)).toString(16);
+  }
+  return uuidValue;
+}
+
+
+
+export async function saveCode(code: string) {
+  const KV_REST_API_URL = "https://valued-macaw-45725.kv.vercel-storage.com"
+  const KV_REST_API_TOKEN = "AbKdASQgN2FmZjk5ZTEtMjgzNS00ZWY5LThiNDktZTA4ZjgwZjdlMzEzODgzYTk4NDk1ODFjNDc5MmI5YjkxOGJiYjMyNDMxZmM="
+  const kv = createClient({
+    url: KV_REST_API_URL,
+    token: KV_REST_API_TOKEN,
+  })
+  const newId = uuid()
+  console.log('kkkkkkkkkvvvvvvvvvv', kv.hmset(newId,
+    {
+      ['code']: code,
+      // ['baseId']: baseId,
+      // ['tableId']: tableId
+    }))
+  const url = 'http://localhost:3000/dynamic-render?uuid=' + newId
+  return url
 }

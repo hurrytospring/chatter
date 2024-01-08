@@ -13,16 +13,11 @@ import JSON5 from 'json5'
 import { randomUUID } from 'crypto'
 import { uniqueId } from 'lodash'
 
-
+import { saveCode } from '@/app/actions'
 import { createClient } from "@vercel/kv"
 
 
-const KV_REST_API_URL = "https://valued-macaw-45725.kv.vercel-storage.com"
-const KV_REST_API_TOKEN = "AbKdASQgN2FmZjk5ZTEtMjgzNS00ZWY5LThiNDktZTA4ZjgwZjdlMzEzODgzYTk4NDk1ODFjNDc5MmI5YjkxOGJiYjMyNDMxZmM="
-const kv = createClient({
-  url: KV_REST_API_URL,
-  token: KV_REST_API_TOKEN,
-})
+
 const fnKey = 'create_base_page'
 export const pageCreatorFnDef = {
   name: fnKey,
@@ -89,7 +84,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
     experimental_onFunctionCall: async (chatMessages, functionCall) => {
       console.log('gen code:00000', functionCall)
 
-      if (functionCall.name === 'gen_page_from_code') {
+      if (functionCall.name == 'gen_page_from_code') {
         try {
           console.log('gen code:11111', functionCall.arguments)
 
@@ -97,17 +92,9 @@ export const usePageCreatorAgent = (operate: Operator) => {
           const args = parseJSON(functionCall.arguments || '{}')
 
           const code = args.code
-          console.log('gen code:22222', code)
-          // const uuid = randomUUID()
-          const uuid = uniqueId()
-          console.log('kkkkkkkkkvvvvvvvvvv', kv.hmset(uuid,
-            {
-              ['code']: code,
-              // ['baseId']: baseId,
-              // ['tableId']: tableId
-            }))
-          const url = 'app/dynamic-render/pageid=' + uuid
-          console.log('uuuuuuuuuuuuuurl',url)
+          console.log('gen code:22222', code) 
+          const url = await saveCode(code)
+          console.log('uuuuuuuuuuuuuurl', url)
 
 
           // setPageStatus("loaded")
@@ -151,10 +138,17 @@ export const usePageCreatorAgent = (operate: Operator) => {
     //   当前的详情数据示例为: ${JSON.stringify(curDetailData, null, 2)}
     //   请你结合这些数据的含义，判断应该强调的信息，以创建不同样式的页面
     // `
+    const tableInfo = await BaseAISDK.getTableMetaList();
+    const tableInfoList = JSON.stringify(tableInfo, null, 2);
+    // const bgPrompt = `
+    //     多维表格中所有数据表信息为:\n`
+    //   + tableInfoList + `
+    //     请调用sdk获取数据，创建各类界面。
+    // `
     const bgPrompt = `
-        请调用sdk获取数据，创建各类界面，严格根据用户输入的内容作为输入参数。
-        创建详情页面时，以表名为大标题，置于页面顶端，字段以 “字段名 字段值”为一行，纵向排列
-    `
+    请调用sdk获取数据，创建各类界面，严格根据用户输入的内容作为输入参数。
+    创建详情页面时，以表名为大标题，置于页面顶端，字段以 “字段名 字段值”为一行，纵向排列
+`
     console.log(`ccccccccall pageCreator agent--in-progress: ${bgPrompt}`)
     const bgMessage = {
       role: 'system',

@@ -60,11 +60,13 @@ export class BaseAISDK {
 
 
   static async getFieldsData_plugin(tableName: string){
+    console.log('--------using plugin mode--------')
     const table = await bitable.base.getTable(tableName)
     const fieldList = await table.getFieldMetaList()
     return fieldList
   }
   static async getRecordsData_plugin(tableName: string){
+    console.log('--------using plugin mode--------')
     const table = await bitable.base.getTable(tableName)
     const recIds = await table.getRecordIdList()
     const recordValue = await Promise.all(
