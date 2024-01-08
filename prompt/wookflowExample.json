@@ -1,0 +1,163 @@
+{
+    "steps": [
+      {
+        "id": "trigWP4cE3Pr",
+        "type": "TimerTrigger",
+        "data": {
+          "rule": "WORKDAY",
+          "startTime": 1703593696210
+        },
+        "next": [
+          {
+            "ids": [
+              "actFW0kfi70"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "actFW0kfi70",
+        "type": "FindRecordAction",
+        "data": {
+          "tableId": "tblj1EE67rbv8mOs",
+          "fieldIds": [
+            "fld2hL8jqp",
+            "fldKrteDm0",
+            "fldWVv0mIB"
+          ],
+          "fieldsMap": {
+            "fld2hL8jqp": {
+              "type": 1
+            },
+            "fldKrteDm0": {
+              "type": 23
+            },
+            "fldWVv0mIB": {
+              "type": 11
+            }
+          },
+          "recordType": "Filter",
+          "shouldProceedWithNoResults": false,
+          "recordInfo": {
+            "conjunction": "and",
+            "conditions": [
+              {
+                "fieldId": "fld2hL8jqp",
+                "fieldType": 1,
+                "operator": "is",
+                "value": [
+                  {
+                    "text": "12",
+                    "type": "text"
+                  }
+                ],
+                "conditionId": "conAY2ZsLY"
+              }
+            ]
+          }
+        },
+        "next": [
+          {
+            "ids": [
+              "actm6dW9MgG"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "actm6dW9MgG",
+        "type": "LarkMessageAction",
+        "data": {
+          "notifyIdentity": "mixed",
+          "robotType": "baseApp",
+          "persons": [
+            {
+              "type": "ref",
+              "avatarUrl": "https://internal-api-lark-file.feishu-boe.cn/static-resource/v1/v3_006g_2cbb57fe-312b-4000-b2f8-9228b59648aj~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+              "id": "7316800534176858132",
+              "value": "刘海波",
+              "tagType": "user",
+              "owner_type": 0,
+              "department": ""
+            }
+          ],
+          "groups": [
+            {
+              "type": "ref",
+              "avatarUrl": "https://internal-api-lark-file.feishu-boe.cn/static-resource/v1/v3_006g_2cbb57fe-312b-4000-b2f8-9228b59648aj~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+              "id": "7316800534176858132",
+              "value": "刘海波",
+              "tagType": "user",
+              "owner_type": 0,
+              "department": ""
+            }
+          ],
+          "title": [
+            {
+              "text": "每日记录汇总",
+              "type": "text"
+            }
+          ],
+          "titleTemplateColor": "purple",
+          "content": [
+            {
+              "text": "<at id=all></at>",
+              "type": "text"
+            },
+            {
+              "id": "actFW0kfi70-stepRecord116",
+              "tagType": "stepRecordFields",
+              "stepType": "FindRecordAction",
+              "stepNum": 2,
+              "stepId": "actFW0kfi70",
+              "fields": [
+                {
+                  "fieldId": "fld2hL8jqp",
+                  "type": 1
+                },
+                {
+                  "fieldId": "fldKrteDm0",
+                  "type": 23
+                },
+                {
+                  "fieldId": "fldWVv0mIB",
+                  "type": 11
+                }
+              ],
+              "tableId": "tblj1EE67rbv8mOs",
+              "type": "ref"
+            },
+            {
+              "text": "\\n",
+              "type": "text"
+            }
+          ],
+          "btnList": [
+            {
+              "text": "查看详情",
+              "btnKey": "message_btn_kgjE3Mj9",
+              "btnAction": "openLink",
+              "btnStyle": "primary",
+              "link": [
+                {
+                  "id": "vewxugV1n213",
+                  "tagType": "system",
+                  "value": "",
+                  "tableId": "tblj1EE67rbv8mOs",
+                  "viewId": "vew9SQX7sF",
+                  "systemType": "viewUrl",
+                  "type": "ref"
+                }
+              ]
+            }
+          ],
+          "needBtn": true,
+          "needTopBase": true,
+          "senders": [],
+          "senderType": 4
+        },
+        "next": []
+      }
+    ],
+    "title": "每个工作日自动推送多行记录"
+  }

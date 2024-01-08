@@ -18,12 +18,20 @@ module.exports = {
       },
     },
   },
-  webpack(config) {
+  webpack(config,{isServer}) {
     // Support SVG (aviable )
     config.module.rules.push({
       test: /.md$/,
       use: ['raw-loader'],
     });
+    config.browser=config.browser||{}
+    config.browser.fs='empty'
+    config.browser.crypto='empty'
+
+    config.node = {
+      fs: 'empty',
+      crypto:'empty'
+    }
     return config;
   },
 };

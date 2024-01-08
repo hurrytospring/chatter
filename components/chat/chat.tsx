@@ -25,8 +25,8 @@ import { ChatRequest, FunctionCallHandler, nanoid } from 'ai'
 import { runCode } from '@/app/code_runner'
 import { FieldType, bitable } from '@lark-base-open/js-sdk'
 import lodash, { isEqual } from 'lodash'
-import {pageCreatorFnDef,usePageCreatorAgent} from '@/lib/hooks/use-page-creator'
-import {CardMessageProvider,useCardMessageContext} from '../float-chatter/message-context'
+import { pageCreatorFnDef, usePageCreatorAgent } from '@/lib/hooks/use-page-creator'
+import { CardMessageProvider, useCardMessageContext } from '../float-chatter/message-context'
 import { FloatChatter } from '../float-chatter/float-chatter'
 import { ChatProps } from './types'
 import { sysFnDef, useSysAgent } from '@/lib/hooks/use-sys-agent'
@@ -35,8 +35,8 @@ import { dataAnasisAgentConfig } from '@/lib/hooks/use-data-anasis'
 import { CardMessage } from '../float-chatter/types'
 import { useStepContext } from '@mui/material'
 import { merge, useDebugMode } from './chatUtil'
-import {dashboardFnDef,useDashboardAgent} from '@/lib/hooks/use-dashboard-agent'
-import {workflowFnDef,useWorkflowAgent} from '@/lib/hooks/use-workflow-agent'
+import { dashboardFnDef, useDashboardAgent } from '@/lib/hooks/use-dashboard-agent'
+import { workflowFnDef, useWorkflowAgent } from '@/lib/hooks/use-workflow-agent'
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 //TODO：改正这里的bad code
@@ -72,7 +72,7 @@ export function ChatPure({
       body: {
         id,
         previewToken,
-        modelConfig: { functions: [pageCreatorFnDef,sysFnDef,dataAnasisAgentConfig.outFnDef,dashboardFnDef,workflowFnDef] }
+        modelConfig: { functions: [pageCreatorFnDef, sysFnDef, dataAnasisAgentConfig.outFnDef, dashboardFnDef, workflowFnDef] }
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -105,12 +105,12 @@ export function ChatPure({
           agentResultP = sysAgentHandle(chatMessages, functionCall)
         } else if (dataAnasisAgentHandle.assert(functionCall)) {
           agentResultP = dataAnasisAgentHandle(chatMessages, functionCall)
-        }else if(dashboardAgentHandle.assert(functionCall)){
-          agentResultP = dashboardAgentHandle(chatMessages,functionCall)
-        }else if(workflowAgentHandle.assert(functionCall)){
+        } else if (dashboardAgentHandle.assert(functionCall)) {
+          agentResultP = dashboardAgentHandle(chatMessages, functionCall)
+        } else if (workflowAgentHandle.assert(functionCall)) {
           agentResultP = workflowAgentHandle(chatMessages, functionCall)
-        }else {
-          agentResultP = new Promise(() => {})
+        } else {
+          agentResultP = new Promise(() => { })
         }
         //这里要把消息update上去实在是不方便，就把loading隐藏了吧
         agentResultP.then((chRe: void | ChatRequest) => {

@@ -3,7 +3,7 @@ import prompt from '../../prompt/base_dashboard_creator_plugin.md'
 import { useChat } from 'ai/react'
 import { nanoid, parseJSON } from '../utils'
 import { FunctionCallHandlerWithAssert } from '../types'
-import { codeGeneratorDef } from '../functions'
+import { codeGeneratorDef, rejectDef } from '../functions'
 import { BaseAISDK } from '../base-ai-sdk/base-ai-sdk'
 import { Operator } from '@/components/float-chatter/types'
 import { cache } from 'react'
@@ -11,6 +11,7 @@ import { runCode } from '@/app/code_runner'
 import { FieldType, bitable } from '@lark-base-open/js-sdk'
 import lodash from 'lodash'
 import * as dashboardStruct from '../base-ai-sdk/dashboardStruct'
+import { StringToBoolean } from 'class-variance-authority/dist/types'
 
 const fnKey = 'create_dashboard'
 export const dashboardFnDef = {
@@ -43,7 +44,7 @@ export const useDashboardAgent = (operate: Operator) => {
       modelConfig: {
         model: 'gpt-4-1106-preview',
         // model: 'gpt-3.5-turbo',
-        functions: [codeGeneratorDef]
+        functions: [codeGeneratorDef, rejectDef]
       }
     },
 
@@ -51,31 +52,57 @@ export const useDashboardAgent = (operate: Operator) => {
     experimental_onFunctionCall: async (chatMessages, functionCall) => {
       console.log('————————dashboardAgent receiverd Call!————————\n', functionCall)
       let result: string = ""
-      try {
-        //注意functionCall返回的code参数可能不符合json格式
-        const code: string = JSON.parse(functionCall.arguments || `{}`).code || ''
-        console.log('————————dashboardAgent generated code————————\n', code)
-        //执行代码
-        result = await runCode(code, {BaseAISDK, dashboardStruct})
-        console.log("————————result————————\n", result)
-      } catch (e) {
-        result = "生成失败"
-        console.log('err', e)
-      }
+      if (functionCall.name == 'gen_javascript_code') {
+        try {
+          //注意functionCall返回的code参数可能不符合json格式
+          const code: string = JSON.parse(functionCall.arguments || `{}`).code || ''
+          console.log('————————dashboardAgent generated code————————\n', code)
+          //执行代码
+          result = await runCode(code, { BaseAISDK, dashboardStruct })
+          console.log("————————result————————\n", result)
+        } catch (e) {
+          result = "生成失败"
+          console.log('err', e)
+        }
 
-      const functionResponse: ChatRequest = {
-        messages: [
-          ...chatMessages,
-          {
-            id: nanoid(),
-            name: 'run_javascript_code',
-            role: 'function' as const,
-            content: result,
-            createdAt: new Date(),
-          }
-        ]
+        const functionResponse: ChatRequest = {
+          messages: [
+            ...chatMessages,
+            {
+              id: nanoid(),
+              name: 'run_javascript_code',
+              role: 'function' as const,
+              content: result,
+              createdAt: new Date(),
+            }
+          ]
+        }
+        return functionResponse
       }
-      return functionResponse
+      else if (functionCall.name == 'gen_reject_reason') {
+        try {
+          const reason: string = JSON.parse(functionCall.arguments || `{}`).judgement || ''
+          console.log('————————dashboardAgent rejected for reason————————\n', reason)
+          result = reason
+        } catch (e) {
+          result = "评估失败"
+          console.log('err', e)
+        }
+
+        const functionResponse: ChatRequest = {
+          messages: [
+            ...chatMessages,
+            {
+              id: nanoid(),
+              name: 'reject_request',
+              role: 'function' as const,
+              content: result,
+              createdAt: new Date(),
+            }
+          ]
+        }
+        return functionResponse
+      }
     }
   })
 
@@ -83,8 +110,12 @@ export const useDashboardAgent = (operate: Operator) => {
   const handleCall: FunctionCallHandler = async (chatMessages, functionCall) => {
     console.log('————————dashboardAgent is called———————\n', functionCall)
 
-    const bgPrompt = `
-      请你结合之前告知的BaseAISDK中的内容和操作，以及用户的需求，生成一段javascript代码，达成用户需要进行的操作。
+    const metaInfo = await BaseAISDK.getMetaList();
+    const combinedMetaListsString = JSON.stringify(metaInfo, null, 2);
+
+    // console.log('______________多维表格元信息_____________\n',combinedMetaListsString)
+    const bgPrompt = combinedMetaListsString + `
+      请你分析如果使用之前告知的BaseAISDK中的函数创建仪表盘和图表时，用户的需求中给出的数据表名和字段名是否存在于这些多维表格的数据表元数据和数据表中包含的字段元数据中，如果都存在，则生成一段javascript代码，达成用户需要进行的操作；如果不都存在就给出用户输入与元数据中不一致的部分。
     `
 
     console.log('————————dashboardAgent in progress————————\n', bgPrompt)
@@ -109,14 +140,12 @@ export const useDashboardAgent = (operate: Operator) => {
 
 
     console.log('————————new messages dashboardAgent got————————\n', JSON.stringify([
-      ...initialMessages,
       {
         role: 'user',
         content: functionCall.arguments || '',
         id: nanoid(),
         createdAt: new Date(),
-      },
-      bgMessage
+      }
     ], null, 2))
 
     await reload()

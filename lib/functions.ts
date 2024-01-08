@@ -15,6 +15,22 @@ export const codeGeneratorDef = {
   }
 }
 
+export const rejectDef = {
+  name: 'gen_reject_reason',
+  description:
+    '给出无法生成代码的原因，一般来说是输入的参数无法与数据表和字段的元数据中匹配',
+  parameters: {
+    type: 'object',
+    properties: {
+      judgement: {
+        type: 'string',
+        description: 'the reason why system can not generate code to complete user needs.'
+      }
+    },
+    required: ['judgement']
+  }
+}
+
 export const jsonGeneratorDef = {
   name: 'gen_subtasks',
   description:

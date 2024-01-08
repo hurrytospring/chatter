@@ -11,16 +11,11 @@ export enum TriggerType {
 // trigger类型枚举定义（用于前端组件渲染）
 export enum ActionType {
     Delay = 'Delay',
-    LarkMessage = 'LarkMessageAction',
     AddRecord = 'AddRecordAction',
     SetRecord = 'SetRecordAction',
     FindRecord = 'FindRecordAction',
-    HTTPClient = 'HTTPClientAction',
-    // 二方Action
-    APIHub = 'APIHubAction',
-    RefreshAIField = 'RefreshAIFieldAction',
-    // 三方Action
-    Extension = 'ExtensionAction',
+    LarkMessage = 'LarkMessageAction'
+
 }
 
 export enum FOperator {
@@ -112,3 +107,37 @@ export enum SegmentType {
     OPTION = 'option',
     PARAM = 'param',
 };
+
+export enum FieldType {
+    NotSupport = 0,
+    Text = 1,
+    Number = 2,
+    SingleSelect = 3,
+    MultiSelect = 4,
+    DateTime = 5,
+    Checkbox = 7,
+    User = 11,
+    Phone = 13,
+    Url = 15,
+    Attachment = 17,
+    SingleLink = 18,
+    Lookup = 19,
+    Formula = 20,
+    DuplexLink = 21,
+    Location = 22,
+    GroupChat = 23,
+    Denied = 403,
+    /**
+     * 引用类型字段，前后端约定用10xx公共前缀开头
+     */
+    CreatedTime = 1001,
+    ModifiedTime = 1002,
+    CreatedUser = 1003,
+    ModifiedUser = 1004,
+    AutoNumber = 1005,
+    Barcode = 99001,
+    Progress = 99002,
+    Currency = 99003,
+    Rating = 99004,
+    Email = 99005
+}

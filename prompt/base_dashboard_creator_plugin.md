@@ -2,12 +2,26 @@
 
 # BaseAISDK是一个用于开发多维表格服务端脚本的工具包，帮助你快速实现自定义功能、函数，BaseAISDK的使用说明如下：
 ## 有如下方法定义
+
+### 获取当前多维表格下所有数据表元信息  getTableMetaList(): Promise<{id: string;name: string;isSync: boolean;}[]> 
+示例
+```typescript
+const tableMetaList = await BaseAISDK.getTableMetaList();
+```
+
 ### 通过数据表获取数据表id  getTableIdbyName: (tableName: string) =><string>
 示例
 ```typescript
 const tableId = await BaseAISDK.getTableIdByName("订单表");
 ```
-### 通过字段名获取字段id和字段类型 getFieldbyName: (tableId: string, fieldName: string) =>Promise<{
+
+### 获取指定数据表的所有字段元信息  getFieldMetaList(tableName: string): Promise<{id: string; type: FieldType; property: IFieldProperty; name: string; isPrimary: boolean; description: IBaseFieldDescription;}[]> 
+示例
+```typescript
+const FieldMetaList =  await BaseAISDK.getFieldMetaList("销售表");
+```
+
+### 通过字段名获取字段id和字段类型 getFieldByName: (tableId: string, fieldName: string) =>Promise<{
     fieldId: string;
     fieldType: Promise<FieldType>;
 }>
@@ -22,6 +36,7 @@ const fieldInfo = await BaseAISDK.getFieldByName("tbqwerty123456","销售金额"
 ```typescript
 const dashBoardID = await BaseAISDK.addDashboard("2023年每月业务额");
 ``` 
+
 ### 在当前仪表盘中新增一个图表， addChart: (DashBoardId: string, chartName: string, type: DetailChart, commonDataCondition: ICommonDataCondition)=>Promise<string>
 #### DashBoardId: 用于添加图表的仪表盘
 #### chartName: 新建图表的名字
@@ -126,4 +141,4 @@ export enum Rollup {
 ## 注意严格遵循以上类型定义中的api和属性，不要自己想象，创造属性和api
 ## 用户没有指明上下文时，请以当前表和当前表结构作为输出的上下文
 ## 上述方法定义中传入参数仅供参考，执行上述方法时，请根据用户的输入内容来确定具体的参数，若参数是直接在数据表中可以找到的，则直接使用其作为参数，否则你需要自己分析如何根据已知的数据通过统计和计算来得到需要的数据作为参数。
-
+## 在使用数据表及其中字段创建仪表盘和图表时，应当使用客观存在的数据表名和字段名：首先获得当前所有数据表元数据，使用其中存在的表名，同样获得表中所有字段元数据，使用其中存在的字段名。

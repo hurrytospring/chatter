@@ -21,7 +21,7 @@ export const sysFnDef = {
     properties: {
       content: {
         type: 'string',
-        description: '一段话，描述要建设什么样的表，什么样的字段，什么样的记录'
+        description: '一段话，描述要创建什么样的数据表，添加什么样的字段。'
       }
     },
     required: ['content']
@@ -84,8 +84,9 @@ export const useSysAgent = (operate: Operator) => {
 
   const handleCall: FunctionCallHandler = async (chatMessages, functionCall) => {
     console.log('————————sysAgent is called———————\n', functionCall)
-
+    //console.log("!!!!!!!!!!!!!!!!!!!!!!chatMessages是这个东西!!!!!!!!!!!!!!\n",...chatMessages.slice(2))
     const bgPrompt = `
+      再次强调，数据表中的字段类型包括"文本"、"数字"、"单选"、"多选"、"链接"、"时间"、"创建时间"、"更新时间"、"评分"、"进度"、"邮箱"、"附件"，请不要自己新建类型。
       请你结合之前告知的BaseAISDK中的内容和操作，以及用户的需求，生成一段javascript代码，达成用户需要进行的操作。
     `
 
@@ -102,15 +103,16 @@ export const useSysAgent = (operate: Operator) => {
     setMessages([
       bgMessage,
       ...initialMessages,
-      { role: 'user', 
-      content: functionCall.arguments || '', 
-      id: nanoid(), 
-      createdAt: new Date() }
+      {
+        role: 'user',
+        content: functionCall.arguments || '',
+        id: nanoid(),
+        createdAt: new Date()
+      }
     ])
 
 
     console.log('————————new messages sysAgent got————————\n', JSON.stringify([
-      bgMessage,
       { role: 'user', content: functionCall.arguments || '', id: nanoid(), createdAt: new Date() }
     ], null, 2))
 

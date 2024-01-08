@@ -27,10 +27,23 @@ action是工作流程的执行。触发trigger时将执行一系列操作。
 上述子任务结构是为了给调用的函数提供参数，每个函数的定义如下：
 ## BaseAISDK是一个用于开发多维表格服务端脚本的工具包，帮助你快速实现自定义功能、函数，BaseAISDK的使用说明如下：
 ### 有如下方法定义
+
+获取当前多维表格下所有数据表元信息  getTableMetaList(): Promise<{id: string;name: string;isSync: boolean;}[]> 
+示例
+```typescript
+const tableMetaList = await BaseAISDK.getTableMetaList();
+```
+
 通过数据表获取数据表id  getTableIdbyName: (tableName: string) =><string>
 示例
 ```typescript
 const tableId = await BaseAISDK.getTableIdByName("订单表");
+```
+
+获取指定数据表的所有字段元信息  getFieldMetaList(tableName: string): Promise<{id: string; type: FieldType; property: IFieldProperty; name: string; isPrimary: boolean; description: IBaseFieldDescription;}[]> 
+示例
+```typescript
+const FieldMetaList =  await BaseAISDK.getFieldMetaList("销售表");
 ```
 
 通过字段名获取字段id和字段类型 getFieldbyName: (tableId: string, fieldName: string) =>Promise<{
@@ -42,11 +55,55 @@ const tableId = await BaseAISDK.getTableIdByName("订单表");
 const fieldInfo = await BaseAISDK.getFieldByName("tbqwerty123456","销售金额");
 ```
 
-根据工作流子任务生成json generateJson: (flow: StepData[]): Promise<string[]>
+根据工作流子任务生成json generateJson: (flow: StepData[], title: string): 
 示例
 ```typescript
-jsonData = await BaseAISDK.generateJson(flow) 
+jsonData = await BaseAISDK.generateJson(flow,"每个工作日自动推送多行记录") 
 ```
+
+根据字段类型和字段值生成value  generateValueByType(tableId: string, content: string[], fieldtype: FieldType, fieldId: string | 'noneed'): Promise<string | number | (string | null)[] | {
+    type: workflowStruct.SegmentType;
+    text: string;
+}[] | undefined>
+示例
+```typescript
+const value = await BaseAISDK.generateValueByType("tbasdklhja123",["optasd123","optqwe456"],FieldType.MultiSelect,"qwe123rty456")
+```
+注意：
+content数组通常只有一个元素，只有当fieldtype类型为FieldType.MultiSelect时，数组元素可能有多个。
+只有当fieldtype类型为FieldType.MultiSelect或FieldType.SingleSelect时，fieldId需要提供用来找到选项列表。
+当fieldtype类型为FieldType.DateTime时，content数组中元素需要为指定时间对应的时间戳的形式（number）。
+
+生成新增记录action的结构化数据 generateAddRecordActionData(tableId: string, fieldIds: string[], content: string[][]): Promise<{
+    tableId: string;
+    values: {
+        fieldId: string;
+        fieldType: FieldType;
+        value: string | number | (string | null)[] | {
+            type: workflowStruct.SegmentType;
+            text: string;
+        }[] | undefined;
+        valueType: string;
+    }[];
+}>
+示例
+```typescript
+const ActionData = await BaseAISDK.generateAddRecordActionData("tbasdklhja123",["fldBEJP2yS","fldBEJPasd","fldBEJP1qw","fldBEJPzxc"],[["optasd123","optqwe456"],['1231234345'],["optzxc123"],["zxcvcbbnm"]])
+```
+注意：
+fieldIds的长度和content[0]的长度应一致，每个content中的元素相当于是一个对应field中需要加入的记录。 
+
+
+interface IFieldMeta {
+  id: string;
+  type: FieldType;
+  property: IFieldProperty;
+  name: string;
+  isPrimary: boolean;
+  description: IBaseFieldDescription;
+}
+
+
 
 
 interface StepData {
@@ -54,29 +111,53 @@ interface StepData {
   id: string;
   // 下面的Trigger、Action
   data: TriggerData | ActionData;
-  // 标识当前step 类型
+  // 标识当前step 类型，当step为action类型时，不要忘记这个元素。
   type: workflowStruct.TriggerType | workflowStruct.ActionType;
   // 当前步骤的下一步指向。最后一步该数据为[]
   next: [{
-    // 指向下一步的stepId
+    // 指向下一步的stepId,只有一个元素
     ids: [string];
     // 当且仅当Trigger添加了Condtion条件配置才有，Action节点不存在
-    condition?: ConditionInfo;
+    // condition?: {
+      // conjunction: "and" | "or";
+      // conditions: ConditionInfo
+    // }
   }] | [];
 }
+示例：
+一个addRecordTriggerStep的创建如下：
+```typescript
+  const trigger = {
+    id: 'AddRecordTrigger_1',
+    data: {
+      tableId: "tbasdklhja123",
+      watchedFieldId: "fldBEJPasd"
+    },
+    type: workflowStruct.TriggerType.AddRecord,
+    next: [{ids:['AddRecordAction_1']}]
+  };
+```
+一个addRecordActionStep的创建如下：
+```typescript
+const action = {
+    id: 'AddRecordAction_1',
+    data:  await BaseAISDK.generateAddRecordActionData("tbasdklhja123", ["fldBEJP2yS"], [['有一项新的测试任务']]);,
+    type: workflowStruct.ActionType.AddRecord,
+    next: []
+  };
+```
 
 // -----------------------------trigger data------------------------------------
 interface TriggerData { }
 interface AddRecordTriggerV2Data extends TriggerData {
   // 选择的数据表tableId
   tableId: string;
-  // 关注的字段fieldId (存量历史流程没有)
+  // 关注的字段fieldId (当这个字段不为空时触发)
   watchedFieldId?: string;
 }
-
 // 设置的筛选条件
-interface ConditionInfo{}
-interface IFilterInfo extends ConditionInfo{
+interface ConditionInfo { }
+interface IFilterInfo extends ConditionInfo {
   // 条件之间的关系 “且” or “或”
   conjunction: "and" | "or";
   conditions: {
@@ -121,7 +202,6 @@ interface ChangeRecordData extends TriggerData {
     value?: IFilterFieldValue;
   }[];
 }
-
 interface ReminderTriggerData extends TriggerData {
   // 选择的数据表tableId
   tableId: string;
@@ -136,7 +216,6 @@ interface ReminderTriggerData extends TriggerData {
   hour: number;
   minute: number;
 }
-
 interface TimerTriggerData extends TriggerData {
   // 触发时间，单位毫秒
   startTime: number;
@@ -157,21 +236,21 @@ interface ButtonTriggerData extends TriggerData {
   // 选择的按钮字段Id
   fieldId: string;
 }
-
 // -----------------------------action data-----------------------------------------
 interface ActionData { }
 interface addRecordAction extends ActionData {
-  // 添加记录的数据表tableId
-  tableId: string;
-  // 记录内容
-  values: {
-    fieldId: string;
-    fieldType: FieldType;
-    value: any,
-    // 当value 中存在引用值时为ref，否则为value
-    valueType: "ref" | "value"
-  }[];
-}
+  // // 添加记录的数据表tableId
+  // tableId: string;
+  // // 记录内容
+  // values: {
+  //   fieldId: string;
+  //   fieldType: FieldType;
+  //   value: any,
+  //   // 当value 中存在引用值时为ref，否则为value
+  //   valueType: "ref" | "value"
+  // }[];
+}// 通过调用generateAddRecordActionData生成
+
 interface RefRecordInfo {
   // 步骤的id
   stepId: string;
@@ -191,7 +270,7 @@ interface setRecordAction extends ActionData {
   values: {
     fieldId: string;
     fieldType: FieldType;
-    value: any,
+    value:  any, //调用BaseSDK.generateValueByType的返回值
     // 当value 中存在引用值时为ref，否则为value
     valueType: "ref" | "value"
   }[];
@@ -213,49 +292,6 @@ interface findRecordAction extends ActionData {
   // 未查找到记录时是否继续执行 （默认为true）
   shouldProceedWithNoResults: boolean;
 }
-
-interface sendMsgAction extends ActionData {    // 由谁发送 （下面枚举值分别代表多维表格助手、自定义机器人、流程创建者）
-  robotType: "bitable" | "customize" | "maker";
-  persons: [];
-  groups: [];
-  webhookList: [];
-  // 消息标题背景色
-  titleTemplateColor: workflowStruct.LarkHeaderTemplateColor;
-  // 消息标题
-  title: [];
-  // 消息内容
-  content: Segment[];
-  // 控制配置中的底部按钮是否展示和按钮配置是否参与toschema 编译
-  needBtn: boolean;
-  //按钮配置
-  btnList?: [
-  ];
-}
-interface KeyValueItem {
-  key: string;
-  value: Segment[];
-  type?: FormValueType;
-}
-interface httpClientAction extends ActionData {
-  // 请求方法
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
-  // 请求Url
-  url: Segment[];
-  // 查询参数
-  queries: KeyValueItem[];
-  // 请求头
-  headers: KeyValueItem[];
-  // 请求体类型
-  bodyType?: "none" | "raw" | "form-data" | "form-urlencoded";
-  // bodyType=raw时，对应的请求体内容
-  rawBody: any;
-  // bodyType=form-data时，对应的请求体内容
-  formBody: [];
-  // 响应体
-  responseType: "none" | "text" | "json";
-  responseValue: any
-}
 interface DelayActionData extends ActionData {
   // 延迟时间
   duration: number;
@@ -263,10 +299,86 @@ interface DelayActionData extends ActionData {
   unit: "second" | "minute" | "hour";
 }
 
+interface LarkMessageData extends ActionData {
+  notifyIdentity: "mixed",
+  // 由谁发送 （下面枚举值分别代表多维表格助手、自定义机器人、流程创建者）
+  robotType: "bitable" | "customize" | "maker";
+  person: [
+    {
+      "type": "ref",
+      "avatarUrl": "https://s1-imfile.feishucdn.com/static-resource/v1/v2_8308cedd-c46c-4d08-9b87-ec93e9f3524g~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+      "id": "7104081156387209218",
+      "value": "袁章",
+      "tagType": "user",
+      "owner_type": 0,
+      "department": "Lark Base Engineering-Autopilot"
+    },
+    {
+      "type": "ref",
+      "avatarUrl": "https://s1-imfile.feishucdn.com/static-resource/v1/d7b21728-76c8-454d-b612-471ad1e9280g~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+      "id": "6953431841051262977",
+      "value": "邓范鑫",
+      "tagType": "user",
+      "owner_type": 0,
+      "department": "Lark Base Engineering-Autopilot"
+    }
+  ],
+  groups: [
+    {
+      "type": "ref",
+      "avatarUrl": "https://s1-imfile.feishucdn.com/static-resource/v1/v2_8308cedd-c46c-4d08-9b87-ec93e9f3524g~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+      "id": "7104081156387209218",
+      "value": "袁章",
+      "tagType": "user",
+      "owner_type": 0,
+      "department": "Lark Base Engineering-Autopilot"
+    },
+    {
+      "type": "ref",
+      "avatarUrl": "https://s1-imfile.feishucdn.com/static-resource/v1/d7b21728-76c8-454d-b612-471ad1e9280g~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+      "id": "6953431841051262977",
+      "value": "邓范鑫",
+      "tagType": "user",
+      "owner_type": 0,
+      "department": "Lark Base Engineering-Autopilot"
+    }
+  ],
+  title: [
+    TextSegment
+  ],
+  titleTemplateColor: workflowStruct.LarkHeaderTemplateColor,
+  content: [
+    TextSegment
+  ],
+  btnList: [
+    {
+      "btnKey": "message_btn_CJ6lMOSF",
+      "btnAction": "openLink",
+      "btnStyle": "primary",
+      "text": "查看记录详情",
+      "link": [
+        {
+          "id": "trigQn3FdKJs-tblyFuLY91TH6WNo-recordUrl10",
+          "tagType": "stepLink",
+          "stepId": "trigQn3FdKJs",
+          "stepType": "AddRecordTrigger",
+          "tableId": "tblyFuLY91TH6WNo",
+          "isShortcut": true,
+          "fieldId": "",
+          "viewId": "",
+          "value": "",
+          "stepNum": 1,
+          "type": "ref"
+        }
+      ]
+    }
+  ],
+  needBtn: false,
+  needTopBase: true
+}
 // ------------------------------condition-------------------------------------------
-
 // Field相关的Triggger对应的Condition结构
-interface FieldCondtionInfo extends ConditionInfo{
+interface FieldCondtionInfo extends ConditionInfo {
   conjunction: workflowStruct.FilterConjunction;
   conditions: {
     conjunction: workflowStruct.FilterConjunction;
@@ -276,10 +388,9 @@ interface FieldCondtionInfo extends ConditionInfo{
       fieldType: FieldType;
       operator: workflowStruct.FOperator;
       value: any
-       }[]
+    }[]
   }[];
 }
-
 // 定时触发Trigger对应的Condition结构
 interface TimeConditionInfo extends ConditionInfo {
   operator: workflowStruct.FOperator;
@@ -287,18 +398,43 @@ interface TimeConditionInfo extends ConditionInfo {
   // FilterDuration 定义的枚举值（除过ExactDate），
   [Exclude<workflowStruct.FilterDuration, workflowStruct.FilterDuration.ExactDate>]
   // 表示具体日期，数组第一个值固定为“ExactDate”
-  | [workflowStruct.FilterDuration.ExactDate, DateTimeDomainFieldValue]
+  | [workflowStruct.FilterDuration.ExactDate, workflowStruct.DateTimeDomainFieldValue]
   | null;
 }
-
 // -------------------------------------segment-----------------------------------
-
 export interface Segment {
   // segment类型标识
   type: workflowStruct.SegmentType;
   // 校验segment是否合法，errorType有值，则编译抛错
-  errorType?: workflowStruct.ErrorType;
+  //errorType?: workflowStruct.ErrorType;
 };
+export interface TextSegment extends Segment {
+  type: workflowStruct.SegmentType.TEXT;
+  text: string;
+}
+export interface OptionSegment extends Segment {
+  type: workflowStruct.SegmentType.OPTION;
+  value: string;
+  label?: string;
+}
+export enum FormValueType {
+  TEXT = 'text',
+}
+export type KeyValueItem = { key: string | Segment[]; value: Segment[]; type?: FormValueType };
+
+export interface ParamSegment extends Segment {
+  type: workflowStruct.SegmentType.PARAM;
+  value: KeyValueItem[];
+}
+export interface DateSegment extends Segment {
+  // type: workflowStruct.SegmentType.DATE;
+  value: number; // 日期，ms，unix 时间戳，精度为天
+}
+export interface TimeSegment extends Segment {
+  type: workflowStruct.SegmentType.TIME;
+  value: number; // 小时:分钟，ms，0-86400000
+}
+
 ## workflowStruct也是一个用于开发多维表格服务端脚本的工具包，为你提供一些函数中需要的枚举类型，workflowStruct的使用说明如下：
 
 // Trigger 类型枚举定义 （用于前端组件渲染）
@@ -314,16 +450,9 @@ export enum TriggerType {
 // trigger类型枚举定义（用于前端组件渲染）
 export enum ActionType {
     Delay = 'Delay',
-    LarkMessage = 'LarkMessageAction',
     AddRecord = 'AddRecordAction',
     SetRecord = 'SetRecordAction',
     FindRecord = 'FindRecordAction',
-    HTTPClient = 'HTTPClientAction',
-    // 二方Action
-    APIHub = 'APIHubAction',
-    RefreshAIField = 'RefreshAIFieldAction',
-    // 三方Action
-    Extension = 'ExtensionAction',
 }
 
 export enum FOperator {
@@ -416,9 +545,42 @@ export enum SegmentType {
     PARAM = 'param',
 };
 
-## --- 响应格式 ---
-您应该只使用上述BaseAISDK中给出的函数，利用workflowStruct中的类型进行响应，根据子任务结构的参数填充进入函数
+export enum FieldType {
+    NotSupport = 0,
+    Text = 1,
+    Number = 2,
+    SingleSelect = 3,
+    MultiSelect = 4,
+    DateTime = 5,
+    Checkbox = 7,
+    User = 11,
+    Phone = 13,
+    Url = 15,
+    Attachment = 17,
+    SingleLink = 18,
+    Lookup = 19,
+    Formula = 20,
+    DuplexLink = 21,
+    Location = 22,
+    GroupChat = 23,
+    Denied = 403,
+    /**
+     * 引用类型字段，前后端约定用10xx公共前缀开头
+     */
+    CreatedTime = 1001,
+    ModifiedTime = 1002,
+    CreatedUser = 1003,
+    ModifiedUser = 1004,
+    AutoNumber = 1005,
+    Barcode = 99001,
+    Progress = 99002,
+    Currency = 99003,
+    Rating = 99004,
+    Email = 99005
+}
 
+## --- 响应格式 ---
+您应该只使用上述BaseAISDK中给出的函数，利用workflowStruct中的类型进行响应，根据子任务结构的参数填充进入函数，如需要新建addRecordAction则调用BaseAISDK的generateAddRecordActionData函数来实现。
 
 # 你是一个多维表格的插件，用户告诉你需求时你可以生成相应的javascript代码并通过 run_javascript_code 方法来执行，借助 BaseAISDK包和workflowStruct包，获取并操作多维表格的数据，实现用户的需求，并最终回答用户问题。
 # 回答要求
@@ -429,4 +591,5 @@ export enum SegmentType {
 ## 根据用户的需求选择实现该需求需要用到的上述方法进行调用，严格根据提供的方法进行代码生成，不要自己建立新的逻辑实现。
 ## 注意严格遵循以上类型定义中的api和属性，不要自己想象，创造属性和api
 ## 用户没有指明上下文时，请以当前表和当前表结构作为输出的上下文
-## 上述方法定义中传入参数仅供参考，执行上述方法时，请根据用户的输入内容来确定具体的参数，若参数是直接在数据表中可以找到的，则直接使用其作为参数，否则你需要自己分析如何根据已知的数据通过统计和计算来得到需要的数据作为参数。
+## 上述方法定义中传入参数仅供参考，执行上述方法时，请根据用户的输入内容来确定具体的参数，如果有还没有明确的信息，你需要向用户询问这些细节以完成任务。若参数是直接在数据表中可以找到的，则直接使用其作为参数，否则你需要自己分析如何根据已知的数据通过统计和计算来得到需要的数据作为参数。
+## 在使用数据表及其中字段创建工作流时，应当使用客观存在的数据表名和字段名：首先获得当前所有数据表元数据，使用其中存在的表名，同样获得表中所有字段元数据，使用其中存在的字段名。

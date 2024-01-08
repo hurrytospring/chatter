@@ -1,23 +1,132 @@
-'use client'
+// 'use client'
 
 import {
   FieldType,
   IAttachmentField,
+  IBaseFieldDescription,
+  IFieldProperty,
   IMultiSelectField,
   INumberField,
+  IOpenCellValue,
+  IRecordValue,
+  ISingleSelectField,
   ITable,
+  ITableMeta,
   bitable,
 } from '@lark-base-open/js-sdk'
 import Base from 'antd/es/typography/Base'
 import { Interface } from 'readline'
 import * as workflowStruct from './workflowStruct'
 import * as dashboardStruct from './dashboardStruct'
+import { get } from 'lodash'
+import { table } from 'console'
+import { getDialogContentTextUtilityClass } from '@mui/material'
+import { getRecordsData_page, getFieldsData_page } from '@/app/actions'
+
+
 export class BaseAISDK {
+
+  static async getEnv() {
+    const currentUrl = window.location.href; // 获取完整的 URL
+    if (currentUrl.includes('pageid')) {
+      return 'plugin'
+    }
+    else return 'independent page'
+  }
+  //-----------pageCreator--------//
+
+  static async getRecordsData(tableName: string) {
+    //判断逻辑 server触发还是independent page触发
+    const mode = this.getEnv()
+    if (await mode == 'plugin')
+      return this.getRecordsData_plugin(tableName)
+    if (await mode == 'independent page')
+      return getRecordsData_page(tableName)
+  }
+
+  static async getFieldsData(tableName: string) {
+    //判断逻辑 server触发还是independent page触发
+    const mode = this.getEnv()
+
+    if (await mode == 'plugin')
+      return this.getFieldsData_plugin(tableName)
+
+    if (await mode == 'independent page')
+      return getFieldsData_page(tableName)
+
+  }
+
+
+
+
+  static async getFieldsData_plugin(tableName: string){
+    const table = await bitable.base.getTable(tableName)
+    const fieldList = await table.getFieldMetaList()
+    return fieldList
+  }
+  static async getRecordsData_plugin(tableName: string){
+    const table = await bitable.base.getTable(tableName)
+    const recIds = await table.getRecordIdList()
+    const recordValue = await Promise.all(
+      recIds.map(recId => {
+        return BaseAISDK.getRecCellContent(recId, table)
+      })
+    )
+    return recordValue
+  }
+
+
+
+  
+  static async getFormData_plugin(tableName: string) {
+    const table = await bitable.base.getTable(tableName)
+    const fieldList = await table.getFieldMetaList()
+    return fieldList
+  }
+
+  static async getTableData_plugin(tableName: string) {
+    const table = await bitable.base.getTable(tableName)
+    const recIds = await table.getRecordIdList()
+    const recordValue = await Promise.all(
+      recIds.map(recId => {
+        return BaseAISDK.getRecCellContent(recId, table)
+      })
+    )
+    const fieldList = await table.getFieldMetaList()
+    console.log('ccccccccclient',fieldList)
+    return {
+      header: fieldList.map(f => {
+        return { name: f.name, type: FieldType[f.type] }
+      }),
+      rows: recordValue
+    }
+  }
+
+  static async getDetailData_plugin(tableName: string) {
+    const table = await bitable.base.getTable(tableName)
+    const recordIdList = await table.getRecordIdList()
+    let detailData = []
+    for (const recordId of recordIdList) {
+      const recordData = (await table.getRecordById(recordId)).fields
+      let cells = []
+
+      for (let fieldId in recordData) {
+        const fieldName = await (await table.getField(fieldId)).getName()
+        const value = recordData[fieldId]
+        const cell = { fieldName, value }
+        cells.push(cell)
+      }
+      detailData.push(cells)
+    }
+    return detailData
+  }
+
   //-----------sysAgent-----------//
+
+
   static async getCurListData() {
     const table = await bitable.base.getActiveTable()
     const recIds = await table.getRecordIdList()
-    const fieldList = await table.getFieldList()
     const recordValue = await Promise.all(
       recIds.map(recId => {
         return BaseAISDK.getRecCellContent(recId, table)
@@ -75,13 +184,48 @@ export class BaseAISDK {
       })
     )
   }
+  static async getMetaList() {
+    const tableMetaList = await bitable.base.getTableMetaList();
+
+    // 使用 map 函数结合 async/await 来处理每个表
+    const combinedMetaLists = await Promise.all(tableMetaList.map(async (tableMeta) => {
+      // 使用表的 id 来获取表
+      const table = await bitable.base.getTableById(tableMeta.id);
+      // 获取该表的字段元数据
+      const fieldMetaList = await table.getFieldMetaList();
+
+      // 结合表的元信息和字段元信息
+      return {
+        tableMeta,        // 表的元信息
+        fieldMetaList     // 字段元信息
+      };
+    }));
+    return combinedMetaLists;
+  }
+
   static async getTable() {
     const table = await bitable.base.getActiveTable();
     return table
   }
 
-  static async getFieldMetaList() {
-    const table = await this.getTable();
+  static async getTableMetaList(): Promise<{
+    id: string;
+    name: string;
+    isSync: boolean;
+  }[]> {
+    const tableMetaList = await bitable.base.getTableMetaList();
+    return tableMetaList
+  }
+
+  static async getFieldMetaList(tableName: string): Promise<{
+    id: string;
+    type: FieldType;
+    property: IFieldProperty;
+    name: string;
+    isPrimary: boolean;
+    description: IBaseFieldDescription;
+  }[]> {
+    const table = await bitable.base.getTable(tableName);
     const fieldMetaList = await table.getFieldMetaList();
     return fieldMetaList
   }
@@ -143,99 +287,6 @@ export class BaseAISDK {
     const returnField = await table.getFieldById(field);
     return field
   }
-
-  static async getRecords(tableid: string, pageSize: number) {
-    if (pageSize > 5000)
-      return "数量最大不得超过5000！！"
-    const table = await bitable.base.getTableById(tableid);
-    const records = await table.getRecords({ pageSize: pageSize });
-    return records
-  }
-
-  static async addRecord(tableid: string, Fields: string[], values: string[]) {
-    const table = await bitable.base.getTableById(tableid);
-    const textField = await table.getField(Fields[0]);
-    const textCell = await textField.createCell(values[0]);
-    const recordId = await table.addRecord(textCell);
-    if (Fields.length > 1) {
-      for (let i = 1; i < Fields.length; i++) {
-        const field = await table.getField(Fields[i]);
-        const res = await table.setRecord(recordId, {
-          fields: {
-            [field.id]: values[i]
-          }
-        })
-      }
-    }
-    return recordId;
-  }
-
-  static async editCurRecords(order: number, fieldId: string, recordValues?: string[], recordNums?: number[]) {
-    // order: 1.增 2.删 3.改
-    const table = await bitable.base.getActiveTable()
-
-
-    if (order == 1 && recordValues && recordValues.length > 0) {
-      const textField = await table.getField(fieldId); // 选择某个多行文本字段
-
-      const recordIds: string[] = [];
-      for (const value of recordValues) {
-        const textCell = await textField.createCell(value);
-        const recordId = await table.addRecords([[textCell]]);
-        recordIds.push(recordId[0]);
-      }
-      return {
-        header: recordIds.map(f => {
-          return { name: f, type: textField.getType }
-        }),
-        row: "记录新增成功！"
-      }
-    }
-
-    //单次删除记录上限 5000 条
-    if (order == 2 && recordNums && recordNums.length > 0) {
-      const recordIdList = await table.getRecordIdList();
-      for (const num of recordNums) {
-        await table.deleteRecord(recordIdList[num]);
-      }
-      return {
-        header:
-          { name: "None", type: "None" }
-        ,
-        row: "记录删除成功！"
-      }
-    }
-
-    //
-    if (order == 3 && recordNums && recordNums.length > 0 && recordValues && recordValues.length > 0) {
-      if (recordNums.length == recordValues.length) {
-        const recordIds = await table.getRecordIdList(); // 获取所有记录 id
-        const field = await table.getField(fieldId); // 选择多行文本字段   
-        for (let i = 0; i < recordNums.length; i++) {
-          await table.setRecord(
-            recordIds[i],
-            {
-              fields:
-              {
-                [field.id]: recordValues[i]
-              }
-            }
-          )
-        }
-        return {
-          header: recordIds.map(f => {
-            return { name: f, type: field.getType }
-          }),
-          row: "记录修改成功！"
-        }
-      }
-      else
-        return "记录数与记录值总数不一致！"
-
-
-
-    }
-  }
   //------------dashboardAgent-------------//
   static async addDashboard(dashBoardName: string) {
     const dashboardToken = bitable.bridge.addDashboard(dashBoardName);
@@ -274,17 +325,102 @@ export class BaseAISDK {
   }
   //------------workflowAgent-------------//
 
-  static async generateJson(flow: StepData[]): Promise<string[]> {
-    let jsonFile: string[] = [];
-    for (let step of flow) {
-      jsonFile.push(JSON.stringify(step));
-    }
-    return jsonFile;
+  static async generateJson(flow: StepData[], title: string) {
+    // let jsonFile: string[] = [];
+    // for (let step of flow) {
+    //   jsonFile.push(JSON.stringify(step));
+    // }
+
+    return JSON.stringify(
+      {
+        steps: flow,
+        title: title //工作流的名称
+      });
   }
+
+  static async generateValueByType(tableId: string, content: string[], fieldtype: FieldType, fieldId: string | 'noneed') {
+    switch (fieldtype) {
+      case FieldType.Text: {
+        let value = {
+          type: workflowStruct.SegmentType.TEXT,
+          text: content[0]
+        }
+        console.log("11111111111111111value:::", value)
+        return [value];
+      }
+
+      case FieldType.Number: {
+        return Number(content[0]);
+      }
+
+      case FieldType.SingleSelect: {
+        const table = await bitable.base.getTable(tableId)
+        const field = await table.getField<ISingleSelectField>(fieldId)
+        const options = await field.getOptions()
+        const foundOption = options.find(element => element.name === content[0]);
+        console.log("11111111111111111value:::", foundOption?.id)
+        return foundOption?.id
+      }
+
+      case FieldType.MultiSelect: {
+        const table = await bitable.base.getTable(tableId)
+        const field = await table.getField<ISingleSelectField>(fieldId)
+        const options = await field.getOptions()
+        const ids = content.map(nameToFind => {
+          const foundObject = options.find(element => element.name === nameToFind);
+          return foundObject ? foundObject.id : null;
+        })
+        console.log("11111111111111111value:::", ids)
+        return ids
+      }
+
+      case FieldType.DateTime: {
+        console.log("11111111111111111value:::", content[0])
+        return Number(content[0]);
+      }
+
+      default:
+        throw new Error("Unsupported field type");
+    }
+  }
+
+
+  static async generateAddRecordActionData(tableId: string, fieldIds: string[], content: string[][]) {
+    // 检查 fieldIds 和 content 长度是否相等
+    if (fieldIds.length !== content.length) {
+      throw new Error("fieldIds and content arrays must be of the same length");
+    }
+    const valuesPromise = fieldIds.map(async (fieldId, index) => {
+      const table = await bitable.base.getTable(tableId)
+      const fieldType = await (await table.getFieldById(fieldId)).getType()
+      const value = await this.generateValueByType(tableId, content[index], fieldType, fieldId)
+      return {
+        fieldId: fieldId,
+        fieldType: fieldType,
+        value: value,
+        valueType: 'value'
+      };
+    });
+    const values = await Promise.all(valuesPromise)
+    console.log("22222222222222222values:::", values)
+    return {
+      tableId: tableId,
+      values: values
+    }
+  }
+
 }
 
 
 
+interface IFieldMeta {
+  id: string;
+  type: FieldType;
+  property: IFieldProperty;
+  name: string;
+  isPrimary: boolean;
+  description: IBaseFieldDescription;
+}
 
 
 
@@ -298,10 +434,13 @@ interface StepData {
   type: workflowStruct.TriggerType | workflowStruct.ActionType;
   // 当前步骤的下一步指向。最后一步该数据为[]
   next: [{
-    // 指向下一步的stepId
+    // 指向下一步的stepId,只有一个元素
     ids: [string];
     // 当且仅当Trigger添加了Condtion条件配置才有，Action节点不存在
-    condition?: ConditionInfo;
+    // condition?: {
+    //   conjunction: "and" | "or";
+    //   conditions: ConditionInfo
+    // }
   }] | [];
 }
 // -----------------------------trigger data------------------------------------
@@ -313,8 +452,8 @@ interface AddRecordTriggerV2Data extends TriggerData {
   watchedFieldId?: string;
 }
 // 设置的筛选条件
-interface ConditionInfo{}
-interface IFilterInfo extends ConditionInfo{
+interface ConditionInfo { }
+interface IFilterInfo extends ConditionInfo {
   // 条件之间的关系 “且” or “或”
   conjunction: "and" | "or";
   conditions: {
@@ -325,7 +464,7 @@ interface IFilterInfo extends ConditionInfo{
     // 字段类型
     fieldType: FieldType;
     operator: workflowStruct.FOperator;
-    value: [];
+    value: any;
   }[];
 }
 interface SetRecordData extends TriggerData {
@@ -393,20 +532,22 @@ interface ButtonTriggerData extends TriggerData {
   // 选择的按钮字段Id
   fieldId: string;
 }
+
+
 // -----------------------------action data-----------------------------------------
 interface ActionData { }
 interface addRecordAction extends ActionData {
-  // 添加记录的数据表tableId
-  tableId: string;
-  // 记录内容
-  values: {
-    fieldId: string;
-    fieldType: FieldType;
-    value: any,
-    // 当value 中存在引用值时为ref，否则为value
-    valueType: "ref" | "value"
-  }[];
-}
+  // // 添加记录的数据表tableId
+  // tableId: string;
+  // // 记录内容
+  // values: {
+  //   fieldId: string;
+  //   fieldType: FieldType;
+  //   value: any,
+  //   // 当value 中存在引用值时为ref，否则为value
+  //   valueType: "ref" | "value"
+  // }[];
+}// 通过调用generateAddRecordActionData生成
 interface RefRecordInfo {
   // 步骤的id
   stepId: string;
@@ -448,58 +589,92 @@ interface findRecordAction extends ActionData {
   // 未查找到记录时是否继续执行 （默认为true）
   shouldProceedWithNoResults: boolean;
 }
-interface sendMsgAction extends ActionData {    // 由谁发送 （下面枚举值分别代表多维表格助手、自定义机器人、流程创建者）
-  robotType: "bitable" | "customize" | "maker";
-  persons: [];
-  groups: [];
-  webhookList: [];
-  // 消息标题背景色
-  titleTemplateColor: workflowStruct.LarkHeaderTemplateColor;
-  // 消息标题
-  title: [];
-  // 消息内容
-  content: Segment[];
-  // 控制配置中的底部按钮是否展示和按钮配置是否参与toschema 编译
-  needBtn: boolean;
-  //按钮配置
-  btnList?: [
-  ];
-}
-interface KeyValueItem {
-  key: string;
-  value: Segment[];
-  type?: FormValueType;
-}
-interface httpClientAction extends ActionData {
-  // 请求方法
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
-  // 请求Url
-  url: Segment[];
-  // 查询参数
-  queries: KeyValueItem[];
-  // 请求头
-  headers: KeyValueItem[];
-  // 请求体类型
-  bodyType?: "none" | "raw" | "form-data" | "form-urlencoded";
-  // bodyType=raw时，对应的请求体内容
-  rawBody: any;
-  // bodyType=form-data时，对应的请求体内容
-  formBody: [];
-  // 响应体
-  responseType: "none" | "text" | "json";
-  responseValue: any
-}
 interface DelayActionData extends ActionData {
   // 延迟时间
   duration: number;
   // 延迟时间单位 (目前只有minute)
   unit: "second" | "minute" | "hour";
 }
-
+interface LarkMessageData extends ActionData {
+  notifyIdentity: "mixed",
+  // 由谁发送 （下面枚举值分别代表多维表格助手、自定义机器人、流程创建者）
+  robotType: "bitable" | "customize" | "maker";
+  person: [
+    {
+      "type": "ref",
+      "avatarUrl": "https://s1-imfile.feishucdn.com/static-resource/v1/v2_8308cedd-c46c-4d08-9b87-ec93e9f3524g~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+      "id": "7104081156387209218",
+      "value": "袁章",
+      "tagType": "user",
+      "owner_type": 0,
+      "department": "Lark Base Engineering-Autopilot"
+    },
+    {
+      "type": "ref",
+      "avatarUrl": "https://s1-imfile.feishucdn.com/static-resource/v1/d7b21728-76c8-454d-b612-471ad1e9280g~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+      "id": "6953431841051262977",
+      "value": "邓范鑫",
+      "tagType": "user",
+      "owner_type": 0,
+      "department": "Lark Base Engineering-Autopilot"
+    }
+  ],
+  groups: [
+    {
+      "type": "ref",
+      "avatarUrl": "https://s1-imfile.feishucdn.com/static-resource/v1/v2_8308cedd-c46c-4d08-9b87-ec93e9f3524g~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+      "id": "7104081156387209218",
+      "value": "袁章",
+      "tagType": "user",
+      "owner_type": 0,
+      "department": "Lark Base Engineering-Autopilot"
+    },
+    {
+      "type": "ref",
+      "avatarUrl": "https://s1-imfile.feishucdn.com/static-resource/v1/d7b21728-76c8-454d-b612-471ad1e9280g~?image_size=72x72&cut_type=default-face&quality=&format=jpeg&sticker_format=.webp",
+      "id": "6953431841051262977",
+      "value": "邓范鑫",
+      "tagType": "user",
+      "owner_type": 0,
+      "department": "Lark Base Engineering-Autopilot"
+    }
+  ],
+  title: [
+    TextSegment
+  ],
+  titleTemplateColor: workflowStruct.LarkHeaderTemplateColor,
+  content: [
+    TextSegment
+  ],
+  btnList: [
+    {
+      "btnKey": "message_btn_CJ6lMOSF",
+      "btnAction": "openLink",
+      "btnStyle": "primary",
+      "text": "查看记录详情",
+      "link": [
+        {
+          "id": "trigQn3FdKJs-tblyFuLY91TH6WNo-recordUrl10",
+          "tagType": "stepLink",
+          "stepId": "trigQn3FdKJs",
+          "stepType": "AddRecordTrigger",
+          "tableId": "tblyFuLY91TH6WNo",
+          "isShortcut": true,
+          "fieldId": "",
+          "viewId": "",
+          "value": "",
+          "stepNum": 1,
+          "type": "ref"
+        }
+      ]
+    }
+  ],
+  needBtn: false,
+  needTopBase: true
+}
 // ------------------------------condition-------------------------------------------
 // Field相关的Triggger对应的Condition结构
-interface FieldCondtionInfo extends ConditionInfo{
+interface FieldCondtionInfo extends ConditionInfo {
   conjunction: workflowStruct.FilterConjunction;
   conditions: {
     conjunction: workflowStruct.FilterConjunction;
@@ -509,7 +684,7 @@ interface FieldCondtionInfo extends ConditionInfo{
       fieldType: FieldType;
       operator: workflowStruct.FOperator;
       value: any
-       }[]
+    }[]
   }[];
 }
 // 定时触发Trigger对应的Condition结构
@@ -527,10 +702,34 @@ export interface Segment {
   // segment类型标识
   type: workflowStruct.SegmentType;
   // 校验segment是否合法，errorType有值，则编译抛错
-  errorType?: workflowStruct.ErrorType;
+  //errorType?: workflowStruct.ErrorType;
 };
+export interface TextSegment extends Segment {
+  type: workflowStruct.SegmentType.TEXT;
+  text: string;
+}
+export interface OptionSegment extends Segment {
+  type: workflowStruct.SegmentType.OPTION;
+  value: string;
+  label?: string;
+}
+export enum FormValueType {
+  TEXT = 'text',
+}
+export type KeyValueItem = { key: string | Segment[]; value: Segment[]; type?: FormValueType };
 
-
+export interface ParamSegment extends Segment {
+  type: workflowStruct.SegmentType.PARAM;
+  value: KeyValueItem[];
+}
+export interface DateSegment extends Segment {
+  // type: workflowStruct.SegmentType.DATE;
+  value: number; // 日期，ms，unix 时间戳，精度为天
+}
+export interface TimeSegment extends Segment {
+  type: workflowStruct.SegmentType.TIME;
+  value: number; // 小时:分钟，ms，0-86400000
+}
 
 global.window.BaseAISDK = BaseAISDK
 global.window.bitable = bitable
