@@ -24,6 +24,7 @@ function DynamicRender() {
         getCode(uuid).then(c => {
             setCode(c);
             console.log('fetched-code------', c, uuid)
+            console.log("Babel",Babel)
             setLoading(false);
         })
 
@@ -31,6 +32,9 @@ function DynamicRender() {
 
 
     if (loading) return null;
+    //@ts-ignore
+    const jsCode = Babel.transform(code, { presets: ["react"] }).code;
+    console.log("transformCode",jsCode)
 
     return runCodeSync(code, { MUI, React, getDetailData_page, getTableData_page, getFormData_page,BaseAISDK })
 }

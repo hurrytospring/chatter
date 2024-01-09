@@ -11,7 +11,6 @@ import { MemoizedReactMarkdown } from '@/components/markdown'
 import { IconOpenAI, IconSmartRobot, IconUser } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
 import { langCompMapping } from '../lib/custom-code-block'
-import robotIcon from "/robot.jpeg"
 import Image from 'next/image'
 export interface ChatMessageProps {
   message: Message

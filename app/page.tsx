@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import  CircularProgress from '@mui/material/CircularProgress';
 import { bitable } from '@lark-base-open/js-sdk'
 import { BaseAISDK } from '@/lib/base-ai-sdk/base-ai-sdk'
+import Script from 'next/script'
 
 async function getInitPrompt() {
   const table = await bitable.base.getActiveTable()
@@ -43,5 +44,8 @@ export default function IndexPage() {
   ]
   if (loading) return <CircularProgress />
   //TODO:用更好的方式处理这里的type相关
-  return <Chat id={id} initialMessages={message} setPageStatus={()=>{}}/>
+  return <>
+        <Chat id={id} initialMessages={message} setPageStatus={()=>{}}/>
+
+  </>
 }

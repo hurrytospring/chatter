@@ -1,0 +1,17 @@
+diff --git a/es/index.js b/es/index.js
+index 5654bb09684a492eeac535739cc0e8fb17a8bcbc..90e36facd5d75059a2aae5a3d29b95be9faddc4d 100644
+--- a/es/index.js
++++ b/es/index.js
+@@ -12,10 +12,10 @@
+ 
+ import get from 'lodash.get';
+ import axios, { AxiosError } from 'axios';
+-import 'crypto';
++//import 'crypto';
+ import identity from 'lodash.identity';
+ import pickBy from 'lodash.pickby';
+-import fs from 'fs';
++//import fs from 'fs';
+ import pick from 'lodash.pick';
+ 
+ /******************************************************************************
