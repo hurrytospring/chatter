@@ -343,14 +343,14 @@ function uuid() {
 
 
 export async function saveCode(code: string) {
-  const KV_REST_API_URL = "https://valued-macaw-45725.kv.vercel-storage.com"
-  const KV_REST_API_TOKEN = "AbKdASQgN2FmZjk5ZTEtMjgzNS00ZWY5LThiNDktZTA4ZjgwZjdlMzEzODgzYTk4NDk1ODFjNDc5MmI5YjkxOGJiYjMyNDMxZmM="
-  const kv = createClient({
-    url: KV_REST_API_URL,
-    token: KV_REST_API_TOKEN,
-  })
+  // const KV_REST_API_URL = "https://valued-macaw-45725.kv.vercel-storage.com"
+  // const KV_REST_API_TOKEN = "AbKdASQgN2FmZjk5ZTEtMjgzNS00ZWY5LThiNDktZTA4ZjgwZjdlMzEzODgzYTk4NDk1ODFjNDc5MmI5YjkxOGJiYjMyNDMxZmM="
+  // const kv = createClient({
+  //   url: KV_REST_API_URL,
+  //   token: KV_REST_API_TOKEN,
+  // })
   const newId = uuid()
-  console.log('kkkkkkkkkvvvvvvvvvv', kv.hmset(newId,
+  console.log('kkkkkkkkkvvvvvvvvvv', await kv.hmset(newId,
     {
       ['code']: code,
       // ['baseId']: baseId,

@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { CardMessage } from './float-chatter/types'
 import { cardCompMapping } from './float-chatter/custom-code-block'
 import { CircularProgress } from '@mui/material'
-import { useDebugMode } from './chat/chatUtil'
+import { useCardMessageContext } from './float-chatter/message-context'
 
 export interface ChatList {
   messages: CardMessage[],
@@ -13,7 +13,6 @@ export interface ChatList {
  }
 
 export function ChatList({ messages,hiddenMessageNum}: ChatList) {
-  const {debugMode} = useDebugMode()
   if (!messages.length) {
     return null
   }
@@ -22,9 +21,6 @@ export function ChatList({ messages,hiddenMessageNum}: ChatList) {
       {messages.map((message, index) => (
         <div
           key={index}
-          className={clsx({
-            hidden: debugMode=="debug"?index <  hiddenMessageNum-1:false
-          })}
         >
           <ChatCardMessage card ={message}/>
           {index < messages.length - 1 && (

@@ -10,9 +10,8 @@ const Comp = ()=>{
 //end, don't add extract line
 ```
 ## 你生成的代码将会在一个React 组件内部执行，不需要考虑初始化，挂载，ReactDOM.render 等操作
-## 你创建的页面代码基于 Material Design 3 和tailwind， 用react component来实现，输出js代码片段，需要写react component 的jsx的地方，请用React.createElement 的写法代替
-# 我们给你提供了一个sdk，你可以在组件中调用这些SDK代码，生成函数获取数据，用来渲染页面
-## 全局变量包括：material组件全部挂载在全局变量MUI上、React 挂载在全局变量 React上、BaseAISDK 即上面提到的SDK，全局变量可以直接使用，不用做其他的import/require的动作。
+## 你创建的页面代码基于 Material Design 3 和tailwind， 用react component来实现，输出js代码片段
+## 全局变量包括：material组件全部挂载在全局变量MUI上、React 挂载在全局变量 React上、BaseAISDK 即上面提到的SDK，全局变量可以直接使用，不用做其他的import/require的动作
 ## 不要包含任何引入npm包的操作
 ## 不要直接输出代码，代码生成完成后调用你的技能生成页面
 # 必须通过 function calling 调用工具

@@ -52,27 +52,7 @@ export function PromptForm({
       }}
       ref={formRef}
     >
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background p-1 sm:rounded-md sm:border sm:px-12">
-        {/* <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={e => {
-                e.preventDefault()
-                router.refresh()
-                router.push('/')
-              }}
-              className={cn(
-                buttonVariants({ size: 'sm', variant: 'outline' }),
-                'absolute left-0 top-4 h-8 w-8 rounded-full bg-background p-0 sm:left-4'
-              )}
-            >
-              <IconPlus />
-              <span className="sr-only">New Chat</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
-        </Tooltip> */}
-        <div className='w-full sm:border rounded-md border'>
+        <div className='w-full sm:border rounded-md border flex'>
         <TextArea
           ref={inputRef}
           tabIndex={0}
@@ -85,38 +65,11 @@ export function PromptForm({
           autoSize={{ minRows: 2, maxRows: 6 }}
           bordered={false}
           // className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
-          className='w-full text-base mb-7'
+          className='w-full text-base'
         />
         <IconSend className='w-8 h-8 ml-auto p-1  hover:fill-blue-500 ' onClick={()=>{send()}}/>
         </div>
-        
-        {/* <Textarea
-          ref={inputRef}
-          tabIndex={0}
-          onKeyDown={onKeyDown}
-          rows={1}
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="发送消息"
-          spellCheck={false}
-          className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
-        /> */}
-        {/* <div className="absolute right-0 top-4 sm:right-4">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="submit"
-                size="icon"
-                disabled={isLoading || input === ''}
-              >
-                <IconArrowElbow />
-                <span className="sr-only">发送消息</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>发送消息</TooltipContent>
-          </Tooltip>
-        </div> */}
-      </div>
+
     </form>
   )
 }
