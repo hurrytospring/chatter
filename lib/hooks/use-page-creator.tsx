@@ -65,6 +65,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
     body: {
       modelConfig: {
         model: 'gpt-3.5-turbo',
+        // model: 'gpt-4-1106-preview',
         functions: [dynamicOutputDef]
         // tools: [
         //   {
@@ -82,18 +83,18 @@ export const usePageCreatorAgent = (operate: Operator) => {
       lastMsgRef.current = message
     },
     experimental_onFunctionCall: async (chatMessages, functionCall) => {
+      let url: string = ""
       console.log('gen code:00000', functionCall)
 
       if (functionCall.name == 'gen_page_from_code') {
         try {
-          console.log('gen code:11111', functionCall.arguments)
 
           // 使用正则表达式替换所有反引号为双引号
           const args = parseJSON(functionCall.arguments || '{}')
 
           const code = args.code
-          console.log('gen code:22222', code) 
-          const url = await saveCode(code)
+          console.log('gen codeeeeeeeeeeeeeee:\n', code)
+          url = await saveCode(code)
           console.log('uuuuuuuuuuuuuurl', url)
 
 
@@ -112,6 +113,20 @@ export const usePageCreatorAgent = (operate: Operator) => {
           console.error(e)
         }
       }
+      const functionResponse: ChatRequest = {
+        messages: [
+          ...chatMessages,
+          {
+            id: nanoid(),
+            name: 'run_javascript_code',
+            role: 'function' as const,
+            content: '生成页面的链接为：' + url,
+            createdAt: new Date(),
+          }
+        ]
+      }
+      return functionResponse
+
     }
   })
   // 父agent调用子agent的函数
@@ -120,7 +135,8 @@ export const usePageCreatorAgent = (operate: Operator) => {
     functionCall
   ) => {
     console.log(
-      `ccccccccall pageCreator agent:${JSON.stringify(
+      ` pageCreator agent is called:
+      ${JSON.stringify(
         {
           functionCall,
           chatMessages
@@ -147,8 +163,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
     // `
     const bgPrompt = `
     请调用sdk获取数据，创建各类界面，严格根据用户输入的内容作为输入参数。
-    创建详情页面时，以表名为大标题，置于页面顶端，字段以 “字段名 字段值”为一行，纵向排列
-`
+    `
     console.log(`ccccccccall pageCreator agent--in-progress: ${bgPrompt}`)
     const bgMessage = {
       role: 'system',
@@ -166,7 +181,9 @@ export const usePageCreatorAgent = (operate: Operator) => {
         createdAt: new Date()
       }
     ])
+
     await reload()
+
     console.log(
       `ccccccccall pageCreator agent result:${JSON.stringify(
         { result: lastMsgRef.current?.content },
@@ -183,7 +200,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
           name: fnKey,
           role: 'function' as const,
           content: JSON.stringify({
-            result: '生成完成'
+            result: '生成完成', lastMsgRef
           }),
           createdAt: new Date()
         }
