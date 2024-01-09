@@ -101,15 +101,20 @@ export function ChatPure({
         let agentResultP: Promise<void | ChatRequest>
         if (pageCreatorAgentHandle.assert(functionCall)) {
           agentResultP = pageCreatorAgentHandle(chatMessages, functionCall)
-        } else if (sysAgentHandle.assert(functionCall)) {
+        }
+        else if (sysAgentHandle.assert(functionCall)) {
           agentResultP = sysAgentHandle(chatMessages, functionCall)
-        } else if (dataAnasisAgentHandle.assert(functionCall)) {
+        }
+        else if (dataAnasisAgentHandle.assert(functionCall)) {
           agentResultP = dataAnasisAgentHandle(chatMessages, functionCall)
-        } else if (dashboardAgentHandle.assert(functionCall)) {
+        }
+        else if (dashboardAgentHandle.assert(functionCall)) {
           agentResultP = dashboardAgentHandle(chatMessages, functionCall)
-        } else if (workflowAgentHandle.assert(functionCall)) {
+        }
+        else if (workflowAgentHandle.assert(functionCall)) {
           agentResultP = workflowAgentHandle(chatMessages, functionCall)
-        } else {
+        }
+        else {
           agentResultP = new Promise(() => { })
         }
         //这里要把消息update上去实在是不方便，就把loading隐藏了吧
