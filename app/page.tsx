@@ -23,7 +23,6 @@ export default function IndexPage() {
   const [loading, setLoading] = useState(true)
   const [initCtx, setInitCtx] = useState('')
   useEffect(() => {
-    console.log("why you once!!!!!!!")
     getInitPrompt().then(p => {
       setInitCtx(p)
       setLoading(false)

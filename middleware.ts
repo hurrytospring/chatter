@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
   const baseId = meta.baseId
   const authMetaStr = await kv.get(`authMeta:${baseId}`)
   
-  console.log("?????????authMetaStr",authMetaStr)
+  // console.log("?????????authMetaStr",authMetaStr)
   if (!authMetaStr) {
     return NextResponse.rewrite(new URL('/install', request.url))
   }

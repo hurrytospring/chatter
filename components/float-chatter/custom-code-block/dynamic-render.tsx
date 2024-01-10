@@ -36,8 +36,8 @@ const DynamicRenderPure: FunctionComponent<IDynamicRenderProps> = (
 ) => {
   const { card } = props
   const jsCode = Babel.transform(card.content, { presets: ["react"] }).code;
-  console.log("BabelHere",Babel)
-  console.log(8888,jsCode)
+  // console.log("BabelHere",Babel)
+  // console.log(8888,jsCode)
   return runCodeSync(jsCode, { MUI, React, BaseAISDK }) as JSX.Element
 }
 export const DynamicRender = withError(DynamicRenderPure)
