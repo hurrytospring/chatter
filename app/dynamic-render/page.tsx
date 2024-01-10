@@ -36,7 +36,7 @@ function DynamicRender() {
     const jsCode = Babel.transform(code, { presets: ["react"] }).code;
     // console.log("transformCode",jsCode)
 
-    return runCodeSync(code, { MUI, React, getDetailData_page, getTableData_page, getFormData_page,BaseAISDK })
+    return runCodeSync(jsCode, { MUI, React, getDetailData_page, getTableData_page, getFormData_page,BaseAISDK })
 }
 
 const DynamicRenderPage = DynamicRender
