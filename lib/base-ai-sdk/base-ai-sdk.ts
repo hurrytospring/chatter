@@ -325,11 +325,12 @@ export class BaseAISDK {
 
   static async setField(tableName: string, fieldName: string, type: string, newFieldName?: string) {
     const table = await bitable.base.getTable(tableName)
-    await table.setField(await table.getFieldIdByName(fieldName),
+    const fieldId = await table.setField(await table.getFieldIdByName(fieldName),
       {
         name: newFieldName ? newFieldName : fieldName,
         type: await this.getFieldTypeByInput(type)
       })
+    return fieldId
   }
 
   static async delField(tableName: string, fieldName: string) {
@@ -371,7 +372,7 @@ export class BaseAISDK {
     const table = await bitable.base.getTable(tableName)
     const recordIdList = await table.getRecordIdList()
     await table.getRecordList()
-    const res = await table.deleteRecords(recordIdList.slice(startNum, endNum))
+    const res = await table.deleteRecords(recordIdList.slice(startNum-1, endNum-1))
     return res
   }
   // TODO: 根据指定字段删除或更新多条记录

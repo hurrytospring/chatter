@@ -46,13 +46,13 @@ const tableId = await BaseAISDK.getTableIdByName("订单表");
 const FieldMetaList =  await BaseAISDK.getFieldMetaList("销售表");
 ```
 
-通过字段名获取字段id和字段类型 getFieldbyName: (tableId: string, fieldName: string) =>Promise<{
+通过字段名获取字段id和字段类型 getFieldbyName: (tableName: string, fieldName: string) =>Promise<{
     fieldId: string;
     fieldType: Promise<FieldType>;
 }>
 示例
 ```typescript
-const fieldInfo = await BaseAISDK.getFieldByName("tbqwerty123456","销售金额");
+const fieldInfo = await BaseAISDK.getFieldByName("订单表","销售金额");
 ```
 
 根据工作流子任务生成json generateJson: (flow: StepData[], title: string): 
