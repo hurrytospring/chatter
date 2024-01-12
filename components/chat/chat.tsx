@@ -44,6 +44,7 @@ import {
   useSubAgent
 } from '@/lib/hooks/use-sub-agent'
 import { nanoid } from 'nanoid'
+import { Agent } from '@/lib/hooks/baseAgent' 
 
 const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 //TODO：改正这里的bad code
@@ -64,8 +65,8 @@ export function ChatPure({
   const { callHandler, functions } = useSubAgent()
   //注意默认隐藏初始信息
   const iniMessageNum = initialMessages?.length || 0
-  const { messages, append, reload, stop, isLoading, input, setInput } =
-    useChat({
+  // const { messages, append, reload, stop, isLoading, input, setInput } = new Agent()
+  const { messages, append, reload, stop, isLoading, input, setInput } = useChat({
       api: '/api/chat-common',
       initialMessages,
       id,

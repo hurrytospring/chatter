@@ -1,5 +1,5 @@
 import { ChatRequest, FunctionCall, FunctionCallHandler, Message } from 'ai'
-import prompt from '../../prompt/base_workflow_creator_plugin.md'
+import prompt from '../../prompt/base_workflow_agent_plugin.md'
 import { useChat } from 'ai/react'
 import { nanoid, parseJSON } from '../utils'
 import { FunctionCallHandlerWithAssert } from '../types'

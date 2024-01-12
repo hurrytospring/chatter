@@ -1,5 +1,5 @@
 import { ChatRequest, FunctionCall, FunctionCallHandler, Message } from 'ai'
-import prompt from '../../prompt/base_system_creator_plugin.md'
+import prompt from '../../prompt/base_table_agent_plugin.md'
 import { useChat } from 'ai/react'
 import { nanoid, parseJSON } from '../utils'
 import { FunctionCallHandlerWithAssert } from '../types'
@@ -9,8 +9,8 @@ import { Operator } from '@/components/float-chatter/types'
 import { cache } from 'react'
 import { runCode } from '@/app/code_runner'
 import { FieldType, bitable } from '@lark-base-open/js-sdk'
-import lodash from 'lodash'
-
+import lodash, { isFunction } from 'lodash'
+import { useRef } from 'react'
 
 const fnKey = 'create_base_system'
 export const sysFnDef = {
@@ -21,7 +21,7 @@ export const sysFnDef = {
     properties: {
       content: {
         type: 'string',
-        description: '一段话，描述要创建什么样的数据表，添加什么样的字段。'
+        description: '一段伪代码，包括一个或多个伪函数，每个子函数的格式形如：新增数据表（"体检表"）、添加字段("体检表","姓名","文本")'
       }
     },
     required: ['content']
@@ -37,8 +37,8 @@ const initialMessages: Message[] = [
   }
 ]
 
-
 export const useSysAgent = (operate: Operator) => {
+  const lastMsgRef = useRef<Message | null>(null)
   const { reload, setMessages, isLoading } = useChat({
     api: '/api/chat-common',
     body: {
@@ -48,7 +48,9 @@ export const useSysAgent = (operate: Operator) => {
         functions: [codeGeneratorDef]
       }
     },
-
+    onFinish: (message: Message) => {
+      lastMsgRef.current = message
+    },
 
     experimental_onFunctionCall: async (chatMessages, functionCall) => {
       console.log('————————sysAgent receiverd Call!————————\n', functionCall)
@@ -84,10 +86,9 @@ export const useSysAgent = (operate: Operator) => {
 
   const handleCall: FunctionCallHandler = async (chatMessages, functionCall) => {
     console.log('————————sysAgent is called———————\n', functionCall)
-    //console.log("!!!!!!!!!!!!!!!!!!!!!!chatMessages是这个东西!!!!!!!!!!!!!!\n",...chatMessages.slice(2))
     const bgPrompt = `
       再次强调，数据表中的字段类型包括"文本"、"数字"、"单选"、"多选"、"链接"、"时间"、"创建时间"、"更新时间"、"评分"、"进度"、"邮箱"、"附件"，请不要自己新建类型。
-      请你结合之前告知的BaseAISDK中的内容和操作，以及用户的需求，生成一段javascript代码，达成用户需要进行的操作。
+      请你结合之前告知的BaseAISDK中的内容和操作，检查用户提供的信息是否足够完成其需求，如果可以则生成一段javascript代码，达成用户需要进行的操作；如果不能实现，则将原因返回给用户。
     `
 
     console.log('————————sysAgent in progress————————\n', bgPrompt)
@@ -126,7 +127,7 @@ export const useSysAgent = (operate: Operator) => {
           id: nanoid(),
           name: fnKey,
           role: 'function' as const,
-          content: '表格部分完成，如有剩余流程会继续执行下一步操作。',
+          content: '流程完成或终止。',lastMsgRef,
           createdAt: new Date()
         }
       ]

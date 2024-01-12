@@ -59,13 +59,13 @@ export class BaseAISDK {
 
 
 
-  static async getFieldsData_plugin(tableName: string){
+  static async getFieldsData_plugin(tableName: string) {
     console.log('--------using plugin mode--------')
     const table = await bitable.base.getTable(tableName)
     const fieldList = await table.getFieldMetaList()
     return fieldList
   }
-  static async getRecordsData_plugin(tableName: string){
+  static async getRecordsData_plugin(tableName: string) {
     console.log('--------using plugin mode--------')
     const table = await bitable.base.getTable(tableName)
     const recIds = await table.getRecordIdList()
@@ -79,7 +79,7 @@ export class BaseAISDK {
 
 
 
-  
+
   static async getFormData_plugin(tableName: string) {
     const table = await bitable.base.getTable(tableName)
     const fieldList = await table.getFieldMetaList()
@@ -95,7 +95,7 @@ export class BaseAISDK {
       })
     )
     const fieldList = await table.getFieldMetaList()
-    console.log('ccccccccclient',fieldList)
+    console.log('ccccccccclient', fieldList)
     return {
       header: fieldList.map(f => {
         return { name: f.name, type: FieldType[f.type] }
@@ -123,8 +123,11 @@ export class BaseAISDK {
     return detailData
   }
 
-  //-----------sysAgent-----------//
+  //-----------tableAgent-----------//
 
+
+
+  //=================== metaInfo manipulation ==========================
 
   static async getCurListData() {
     const table = await bitable.base.getActiveTable()
@@ -142,6 +145,7 @@ export class BaseAISDK {
       rows: recordValue
     }
   }
+
   static async getCurDetailData() {
     const table = await bitable.base.getActiveTable()
     const selection = await bitable.base.getSelection()
@@ -157,10 +161,12 @@ export class BaseAISDK {
       row
     }
   }
+
   static async getRecCellStr(recId: string, table: ITable) {
     const fieldList = await table.getFieldList()
     return Promise.all(fieldList.map(f => f.getCellString(recId)))
   }
+
   static async getRecCellContent(recId: string, table: ITable) {
     const fieldList = await table.getFieldList()
     return Promise.all(
@@ -186,29 +192,34 @@ export class BaseAISDK {
       })
     )
   }
+
   static async getMetaList() {
     const tableMetaList = await bitable.base.getTableMetaList();
 
     // 使用 map 函数结合 async/await 来处理每个表
-    const combinedMetaLists = await Promise.all(tableMetaList.map(async (tableMeta) => {
-      // 使用表的 id 来获取表
-      const table = await bitable.base.getTableById(tableMeta.id);
-      // 获取该表的字段元数据
-      const fieldMetaList = await table.getFieldMetaList();
-
-      // 结合表的元信息和字段元信息
-      return {
-        tableMeta,        // 表的元信息
-        fieldMetaList     // 字段元信息
-      };
-    }));
+    const combinedMetaLists = await Promise.all(tableMetaList.map(
+      async (tableMeta) => {
+        // 使用表名来获取表
+        const tableName = tableMeta.name
+        const table = await bitable.base.getTable(tableName);
+        // 获取该表的字段元数据
+        const fieldMetaList = await table.getFieldMetaList();
+        const fieldsInfo = await Promise.all(fieldMetaList.map(async (fieldMeta) => {
+          const fieldName = fieldMeta.name
+          const fieldType = fieldMeta.type
+          return { fieldName, fieldType }
+        }
+        ))
+        // 结合表的元信息和字段元信息
+        return {
+          tableName,        // 表的元信息
+          fieldsInfo    // 字段元信息
+        };
+      }
+    ));
     return combinedMetaLists;
   }
 
-  static async getTable() {
-    const table = await bitable.base.getActiveTable();
-    return table
-  }
 
   static async getTableMetaList(): Promise<{
     id: string;
@@ -232,18 +243,36 @@ export class BaseAISDK {
     return fieldMetaList
   }
 
-  static async addTable(name: string) {
+  //=================== table manipulation ==========================
+
+  static async getTable() {
+    const table = await bitable.base.getActiveTable();
+    return table
+  }
+
+  static async addTable(tableName: string) {
     const { tableId, index } = await bitable.base.addTable(
       {
-        name: name,
+        name: tableName,
         fields: []
       }
     )
     return tableId
   }
 
-  static async addField(tableid: string, name: string, type: string) {
-    const table = await bitable.base.getTableById(tableid)
+  static async delTable(tableName: string) {
+    const res = await bitable.base.deleteTable(await bitable.base.getTableIdByName(tableName))
+    return res
+  }
+
+  static async setTable(tableName: string, newTableName: string) {
+    const tableId = await bitable.base.setTable(await bitable.base.getTableIdByName(tableName), { name: newTableName })
+    return tableId
+  }
+
+  //=================== field manipulation ==========================
+
+  static async getFieldTypeByInput(type: string) {
     let curtype: FieldType;
     switch (type) {
       case "文本":
@@ -285,20 +314,83 @@ export class BaseAISDK {
       default:
         throw new Error("不支持的字段类型");
     }
-    const field = await table.addField({ name: name, type: curtype });
-    const returnField = await table.getFieldById(field);
-    return field
+    return curtype
   }
+
+  static async addField(tableName: string, name: string, type: string) {
+    const table = await bitable.base.getTable(tableName)
+    const fieldId = await table.addField({ name: name, type: await this.getFieldTypeByInput(type) });
+    return fieldId
+  }
+
+  static async setField(tableName: string, fieldName: string, type: string, newFieldName?: string) {
+    const table = await bitable.base.getTable(tableName)
+    await table.setField(await table.getFieldIdByName(fieldName),
+      {
+        name: newFieldName ? newFieldName : fieldName,
+        type: await this.getFieldTypeByInput(type)
+      })
+  }
+
+  static async delField(tableName: string, fieldName: string) {
+    const table = await bitable.base.getTable(tableName)
+    const fieldId = (await this.getFieldByName(tableName, fieldName)).fieldId
+    const res = await table.deleteField(fieldId)
+    return res
+  }
+
+  //=================== record manipulation ==========================
+
+  static async addRecords(tableName: string, records: { cells: { fieldId: string, value: string }[] }[]): Promise<string[]> {
+    try {
+      const table = await bitable.base.getTable(tableName)
+      let recordsToAdd: {
+        fields: {
+          [fieldId: string]: string;
+        };
+      }[] = []; // 初始化 recordsToAdd 为一个空数组
+
+      records.forEach(record => {
+        let fieldsToAdd: { [key: string]: string } = {}; // 在每次迭代时初始化 fieldsToAdd
+        record.cells.forEach(cell => {
+          fieldsToAdd[cell.fieldId] = cell.value;
+        });
+        recordsToAdd.push({ fields: fieldsToAdd });
+      });
+
+      const recordIds = await table.addRecords(recordsToAdd);
+      return recordIds;
+    } catch (error) {
+      // 处理错误的逻辑
+      console.error("Error adding records:", error);
+      throw error; // 或者返回错误的信息
+    }
+  }
+
+  static async delRecordsByNum(tableName: string, startNum: number, endNum: number) {
+    const table = await bitable.base.getTable(tableName)
+    const recordIdList = await table.getRecordIdList()
+    await table.getRecordList()
+    const res = await table.deleteRecords(recordIdList.slice(startNum, endNum))
+    return res
+  }
+  // TODO: 根据指定字段删除或更新多条记录
+  // static async delRecordsByFields() {
+  // }
+
+  // static async setRecordsByFields(){
+  // }
+
   //------------dashboardAgent-------------//
   static async addDashboard(dashBoardName: string) {
     const dashboardToken = bitable.bridge.addDashboard(dashBoardName);
     return dashboardToken;
   }
 
-  static async getFieldByName(tableId: string, fieldName: string) {
+  static async getFieldByName(tableName: string, fieldName: string) {
     try {
       console.log("————————开始获取字段id————————");
-      const table = await bitable.base.getTableById(tableId);
+      const table = await bitable.base.getTable(tableName);
       const field = await table.getField(fieldName);
       const fieldType = field.getType(); // 如果 getType 是一个方法
       console.log("————————获取到的字段为：", field);
@@ -325,6 +417,8 @@ export class BaseAISDK {
     const chart = bitable.bridge.addCharts(dashBoardToken, dataArray);
     return chart;
   }
+
+
   //------------workflowAgent-------------//
 
   static async generateJson(flow: StepData[], title: string) {

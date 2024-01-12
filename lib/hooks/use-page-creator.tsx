@@ -1,5 +1,5 @@
 import { ChatRequest, FunctionCall, FunctionCallHandler, Message } from 'ai'
-import prompt from '../../prompt/base_page_creator_plugin.md'
+import prompt from '../../prompt/base_page_agent_plugin.md'
 import { nanoid, parseJSON } from '../utils'
 import { FunctionCallHandlerWithAssert } from '../types'
 // import { codeRunnerDef } from '../functions'
@@ -8,7 +8,7 @@ import { BaseAISDK } from '../base-ai-sdk/base-ai-sdk'
 import { useRef } from 'react'
 import { Operator } from '@/components/float-chatter/types'
 
-// import { kv } from '@vercel/kv'
+import { kv } from '@vercel/kv'
 import { randomUUID } from 'crypto'
 import { uniqueId } from 'lodash'
 
@@ -83,7 +83,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
     },
     experimental_onFunctionCall: async (chatMessages, functionCall) => {
       let url: string = ""
-      console.log('gen code:00000', functionCall)
+      console.log('!!!!!!!!!!got function call!!!!!!!!!!:\n', functionCall)
 
       if (functionCall.name == 'gen_page_from_code') {
         try {
@@ -92,9 +92,9 @@ export const usePageCreatorAgent = (operate: Operator) => {
           const args = parseJSON(functionCall.arguments || '{}')
 
           const code = args.code
-          console.log('gen codeeeeeeeeeeeeeee:\n', code)
+          console.log('!!!!!!!!!!code!!!!!!!!!!\n', code)
           url = await saveCode(code)
-          console.log('uuuuuuuuuuuuuurl', url)
+          console.log('!!!!!!!!!!!url!!!!!!!!!!!\n', url)
 
 
           // setPageStatus("loaded")
@@ -112,18 +112,22 @@ export const usePageCreatorAgent = (operate: Operator) => {
           console.error(e)
         }
       }
+      // setMessages([...chatMessages,{
+      //   role: 'function' as const,
+      //   content: '生成页面的链接为：' + url,
+      //   id: nanoid(), createdAt: new Date(),
+      //   name: 'run_javascript_code',
+      // }])
       const functionResponse: ChatRequest = {
-        messages: [
-          ...chatMessages,
-          {
-            id: nanoid(),
-            name: 'run_javascript_code',
-            role: 'function' as const,
-            content: '生成页面的链接为：' + url,
-            createdAt: new Date(),
-          }
-        ]
+        messages: [...chatMessages,
+        {
+          role: 'function' as const,
+          content: '生成页面的链接为：' + url,
+          id: nanoid(), createdAt: new Date(),
+          name: 'run_javascript_code',
+        }]
       }
+      console.log('!!!!!!!!!!EXPERIMENTALCALL MESSAGES!!!!!!!!',functionResponse.messages)
       return functionResponse
 
     }
@@ -134,7 +138,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
     functionCall
   ) => {
     console.log(
-      ` pageCreator agent is called:
+      ` pageCreator agent is called:\n
       ${JSON.stringify(
         {
           functionCall,
@@ -161,9 +165,9 @@ export const usePageCreatorAgent = (operate: Operator) => {
     //     请调用sdk获取数据，创建各类界面。
     // `
     const bgPrompt = `
-    请调用sdk获取数据，创建各类界面，严格根据用户输入的内容作为输入参数。
+    检查用户提供的信息是否足够完成其需求，如果可以实现请调用sdk获取数据，创建各类界面，严格根据用户输入的内容作为输入参数；如果不能实现则把原因返回。
     `
-    console.log(`ccccccccall pageCreator agent--in-progress: ${bgPrompt}`)
+    console.log(`!!!!!!!!!!pageCreator agent--in-progress!!!!!!!!!:\n ${bgPrompt}`)
     const bgMessage = {
       role: 'system',
       content: bgPrompt,
@@ -184,13 +188,14 @@ export const usePageCreatorAgent = (operate: Operator) => {
     await reload()
 
     console.log(
-      `ccccccccall pageCreator agent result:${JSON.stringify(
+      `!!!!!!!!!! pageCreator agent result!!!!!!!!!!:\n
+      ${JSON.stringify(
         { result: lastMsgRef.current?.content },
         null,
         2
       )}`
     )
-
+    console.log('ccccccchhhhhhhhaaaaattttt all messages in handlecall:\n', ...chatMessages)
     return {
       messages: [
         ...chatMessages,

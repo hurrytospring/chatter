@@ -21,13 +21,13 @@ const tableId = await BaseAISDK.getTableIdByName("订单表");
 const FieldMetaList =  await BaseAISDK.getFieldMetaList("销售表");
 ```
 
-### 通过字段名获取字段id和字段类型 getFieldByName: (tableId: string, fieldName: string) =>Promise<{
+### 通过字段名获取字段id和字段类型 getFieldByName: (tableName: string, fieldName: string) =>Promise<{
     fieldId: string;
     fieldType: Promise<FieldType>;
 }>
 示例
 ```typescript
-const fieldInfo = await BaseAISDK.getFieldByName("tbqwerty123456","销售金额");
+const fieldInfo = await BaseAISDK.getFieldByName("订单表","销售金额");
 ```
 #### 注意：在调用getFieldIdbyName时一定要注意，传入的fieldName与从当前数据表中解析出的fieldName严格一致。
 
