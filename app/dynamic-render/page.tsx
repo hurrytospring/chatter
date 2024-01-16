@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { kv } from '@vercel/kv'
 import { URLSearchParams } from 'next/dist/compiled/@edge-runtime/primitives/url'
 
-import { getCode, getDetailData_page, getFormData_page, getTableData_page } from 'app/actions'
+import { getCode, getDetailData_page, getFormData_page, getListData_page } from 'app/actions'
 import { useParams, useSearchParams } from 'next/navigation'
 import { BaseAISDK } from '@/lib/base-ai-sdk/base-ai-sdk'
 
@@ -18,13 +18,14 @@ function DynamicRender() {
     // redirect to home if user is already logged in
     const searchParams = useSearchParams()
     const uuid = searchParams.get('uuid') || ''
+    const recordId = searchParams.get('recordid')
     const [loading, setLoading] = useState(true)
     const [code, setCode] = useState('')
     useEffect(() => {
         getCode(uuid).then(c => {
             setCode(c);
             console.log('fetched-code------', c, uuid)
-            console.log("Babel",Babel)
+            console.log("Babel", Babel)
             setLoading(false);
         })
 
@@ -36,7 +37,7 @@ function DynamicRender() {
     const jsCode = Babel.transform(code, { presets: ["react"] }).code;
     // console.log("transformCode",jsCode)
 
-    return runCodeSync(jsCode, { MUI, React, getDetailData_page, getTableData_page, getFormData_page,BaseAISDK })
+    return runCodeSync(jsCode, { MUI, React, recordId, BaseAISDK })
 }
 
 const DynamicRenderPage = DynamicRender

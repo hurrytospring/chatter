@@ -179,7 +179,7 @@ export async function logout(key: string) {
   return cookies().toString()
 }
 
-export async function getTableData_page(tableName: string) {
+export async function getListData_page(tableName: string) {
   const meta = await getAuthMeta();
   if (!meta?.personalBaseToken) throw new Error('no auth');
   const { appToken, personalBaseToken } = meta;
@@ -193,12 +193,7 @@ export async function getTableData_page(tableName: string) {
   if (table == undefined) throw new Error('given tableName not exist')
   const tableId = table.table_id
   if (tableId == undefined) throw new Error('table has no id')
-  // 列出数据表字段
-  const fieldData = (await client.base.appTableField.list({
-    path: {
-      table_id: tableId
-    }
-  })).data?.items
+
 
   // 列出数据表记录
   const recordData = (await client.base.appTableRecord.list({
@@ -207,7 +202,6 @@ export async function getTableData_page(tableName: string) {
     },
   })).data?.items
 
-  console.log('ooooooooooone page fielData\n', fieldData)
   console.log('ooooooooooone page recordData\n', recordData)
   return recordData
 }
@@ -226,18 +220,14 @@ export async function getDetailData_page(tableName: string, recordId: string) {
   if (table == undefined) throw new Error('given tableName not exist')
   const tableId = table.table_id
   if (tableId == undefined) throw new Error('table has no id')
-  // 列出数据表字段
-  const fieldData = (await client.base.appTableField.list({
-    path: {
-      table_id: tableId
-    }
-  })).data?.items
 
-  const recordData = (await client.base.appTableRecord.list({
+
+  const recordData = (await client.base.appTableRecord.get({
     path: {
-      table_id: tableId
+      table_id: tableId,
+      record_id: recordId
     }
-  })).data?.items
+  })).data?.record?.fields
   if (recordData == undefined) throw Error('record has no data.')
   return recordData
 }
@@ -266,56 +256,6 @@ export async function getFormData_page(tableName: string) {
 }
 
 
-export async function getFieldsData_page(tableName: string) {
-  console.log('--------using onepage mode--------')
-  const meta = await getAuthMeta();
-  if (!meta?.personalBaseToken) throw new Error('no auth');
-  const { appToken, personalBaseToken } = meta;
-  const client = new BaseClient({
-    appToken: appToken,
-    personalBaseToken: personalBaseToken
-  });
-  const tableList = (await client.base.appTable.list()).data?.items
-  if (tableList == undefined) throw new Error('no tables')
-  const table = tableList.find(table => table.name === tableName);
-  if (table == undefined) throw new Error('given tableName not exist')
-  const tableId = table.table_id
-  if (tableId == undefined) throw new Error('table has no id')
-  // 列出数据表字段
-  const fieldsData = (await client.base.appTableField.list({
-    path: {
-      table_id: tableId
-    }
-  })).data?.items
-  if (fieldsData == undefined) throw Error('table has no fields.')
-  return fieldsData
-}
-
-export async function getRecordsData_page(tableName: string) {
-  console.log('--------using onepage mode--------')
-  const meta = await getAuthMeta();
-  if (!meta?.personalBaseToken) throw new Error('no auth');
-  const { appToken, personalBaseToken } = meta;
-  const client = new BaseClient({
-    appToken: appToken,
-    personalBaseToken: personalBaseToken
-  });
-  const tableList = (await client.base.appTable.list()).data?.items
-  if (tableList == undefined) throw new Error('no tables')
-  const table = tableList.find(table => table.name === tableName);
-  if (table == undefined) throw new Error('given tableName not exist')
-  const tableId = table.table_id
-  if (tableId == undefined) throw new Error('table has no id')
-
-
-  const recordsData = (await client.base.appTableRecord.list({
-    path: {
-      table_id: tableId
-    }
-  })).data?.items
-  if (recordsData == undefined) throw Error('record has no data.')
-  return recordsData
-}
 
 export async function getCode(uuid: string): Promise<string> {
   console.log("uuid:", uuid);
@@ -342,20 +282,26 @@ function uuid() {
 
 
 
-export async function saveCode(code: string) {
+export async function saveCode(code: string, recordIds: string[]) {
   // const KV_REST_API_URL = "https://valued-macaw-45725.kv.vercel-storage.com"
   // const KV_REST_API_TOKEN = "AbKdASQgN2FmZjk5ZTEtMjgzNS00ZWY5LThiNDktZTA4ZjgwZjdlMzEzODgzYTk4NDk1ODFjNDc5MmI5YjkxOGJiYjMyNDMxZmM="
   // const kv = createClient({
   //   url: KV_REST_API_URL,
   //   token: KV_REST_API_TOKEN,
   // })
-  const newId = uuid()
-  console.log('kkkkkkkkkvvvvvvvvvv', await kv.hmset(newId,
-    {
-      ['code']: code,
-      // ['baseId']: baseId,
-      // ['tableId']: tableId
-    }))
-  const url = 'http://localhost:3000/dynamic-render?uuid=' + newId
-  return url
+  const urls = [];
+
+  for (const recordId of recordIds) {
+    const newId = uuid();
+    console.log('kkkkkkkkkvvvvvvvvvv', await kv.hmset(newId, { 'code': code }));
+
+    let url = 'http://localhost:3000/dynamic-render?uuid=' + newId;
+    if (recordId) {
+      url += '&recordid=' + recordId;
+    }
+
+    urls.push(url);
+  }
+  return urls
 }
+

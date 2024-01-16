@@ -82,7 +82,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
       lastMsgRef.current = message
     },
     experimental_onFunctionCall: async (chatMessages, functionCall) => {
-      let url: string = ""
+      let urls: string[] =[]
       console.log('!!!!!!!!!!got function call!!!!!!!!!!:\n', functionCall)
 
       if (functionCall.name == 'gen_page_from_code') {
@@ -90,12 +90,15 @@ export const usePageCreatorAgent = (operate: Operator) => {
 
           // 使用正则表达式替换所有反引号为双引号
           const args = parseJSON(functionCall.arguments || '{}')
-
+          
           const code = args.code
+          const table =await BaseAISDK.getTable()
+          const recordIds = await table.getRecordIdList()
           console.log('!!!!!!!!!!code!!!!!!!!!!\n', code)
-          url = await saveCode(code)
-          console.log('!!!!!!!!!!!url!!!!!!!!!!!\n', url)
-
+          console.log('!!!!!!!!!!recordIds!!!!!!!!!!\n',recordIds)
+          urls = await saveCode(code,recordIds)
+          console.log('!!!!!!!!!!!urls!!!!!!!!!!!\n', urls)
+          
 
           // setPageStatus("loaded")
           operate({
@@ -122,7 +125,7 @@ export const usePageCreatorAgent = (operate: Operator) => {
         messages: [...chatMessages,
         {
           role: 'function' as const,
-          content: '生成页面的链接为：' + url,
+          content: '生成页面的链接为：' + urls,
           id: nanoid(), createdAt: new Date(),
           name: 'run_javascript_code',
         }]

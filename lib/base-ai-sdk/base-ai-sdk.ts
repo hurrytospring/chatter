@@ -21,8 +21,7 @@ import * as dashboardStruct from './dashboardStruct'
 import { get } from 'lodash'
 import { table } from 'console'
 import { getDialogContentTextUtilityClass } from '@mui/material'
-import { getRecordsData_page, getFieldsData_page } from '@/app/actions'
-
+import { getFormData_page,getListData_page,getDetailData_page } from '@/app/actions' 
 
 export class BaseAISDK {
 
@@ -35,28 +34,41 @@ export class BaseAISDK {
   }
   //-----------pageCreator--------//
 
-  static async getRecordsData(tableName: string) {
-    //判断逻辑 server触发还是independent page触发
-    const mode = this.getEnv()
-    if (await mode == 'plugin')
-      return this.getRecordsData_plugin(tableName)
-    if (await mode == 'independent page')
-      return getRecordsData_page(tableName)
-  }
 
-  static async getFieldsData(tableName: string) {
+
+  static async getFormData(tableName: string) {
     //判断逻辑 server触发还是independent page触发
     const mode = this.getEnv()
 
     if (await mode == 'plugin')
-      return this.getFieldsData_plugin(tableName)
+      return this.getFormData_plugin(tableName)
 
     if (await mode == 'independent page')
-      return getFieldsData_page(tableName)
+      return getFormData_page(tableName)
 
   }
+  static async getListData(tableName: string) {
+    //判断逻辑 server触发还是independent page触发
+    const mode = this.getEnv()
 
+    if (await mode == 'plugin')
+      return this.getListData_plugin(tableName)
 
+    if (await mode == 'independent page')
+      return getListData_page(tableName)
+
+  }
+  static async getDetailData(tableName: string, recordId: string) {
+    //判断逻辑 server触发还是independent page触发
+    const mode = this.getEnv()
+
+    if (await mode == 'plugin')
+      return this.getDetailData_plugin(tableName, recordId)
+
+    if (await mode == 'independent page')
+      return getDetailData_page(tableName,recordId)
+
+  }
 
 
   static async getFieldsData_plugin(tableName: string) {
@@ -86,7 +98,7 @@ export class BaseAISDK {
     return fieldList
   }
 
-  static async getTableData_plugin(tableName: string) {
+  static async getListData_plugin(tableName: string) {
     const table = await bitable.base.getTable(tableName)
     const recIds = await table.getRecordIdList()
     const recordValue = await Promise.all(
@@ -104,24 +116,23 @@ export class BaseAISDK {
     }
   }
 
-  static async getDetailData_plugin(tableName: string) {
+  static async getDetailData_plugin(tableName: string, recordId: string) {
     const table = await bitable.base.getTable(tableName)
-    const recordIdList = await table.getRecordIdList()
-    let detailData = []
-    for (const recordId of recordIdList) {
-      const recordData = (await table.getRecordById(recordId)).fields
-      let cells = []
+    const record = (await table.getRecordById(recordId)).fields
+    let recordData = []
 
-      for (let fieldId in recordData) {
-        const fieldName = await (await table.getField(fieldId)).getName()
-        const value = recordData[fieldId]
-        const cell = { fieldName, value }
-        cells.push(cell)
-      }
-      detailData.push(cells)
+    for (let fieldId in record) {
+      const fieldName = await (await table.getField(fieldId)).getName()
+      const value = record[fieldId]
+      const cell = { fieldName, value }
+      recordData.push(cell)
     }
-    return detailData
+    return recordData
   }
+
+
+
+
 
   //-----------tableAgent-----------//
 
@@ -371,9 +382,23 @@ export class BaseAISDK {
   static async delRecordsByNum(tableName: string, startNum: number, endNum: number) {
     const table = await bitable.base.getTable(tableName)
     const recordIdList = await table.getRecordIdList()
-    await table.getRecordList()
-    const res = await table.deleteRecords(recordIdList.slice(startNum-1, endNum-1))
+    const res = await table.deleteRecords(recordIdList.slice(startNum - 1, endNum - 1))
     return res
+  }
+
+  static async getRecordIdsByFields(tableName: string, fieldNames: string[], values: string[]) {
+    const table = await bitable.base.getTable(tableName)
+
+    // 确保fieldNames和values数组的长度相同
+    if (fieldNames.length !== values.length) {
+      throw new Error("Field names and values must be of the same length.");
+    }
+    const fields = fieldNames.map(async fieldName => {
+      const field = await table.getField(fieldName)
+      return field
+    })
+
+
   }
   // TODO: 根据指定字段删除或更新多条记录
   // static async delRecordsByFields() {

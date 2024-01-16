@@ -22,9 +22,9 @@ const Comp = ()=>{
 # 严格根据用户输入的表名作为输入参数,如'待测试'表，则tableName应该为'待测试';如'待测试表'，则tableName应该为'待测试表'。
 
 # BaseAISDK中全部函数定义如下，请不要自己创造其他函数。
-## 获取数据表字段数据
+## 获取生成表单页面需要的数据
 ```typescript 
-async getFieldsData(tableName: string) :Promise<IFieldMeta$1[] | {
+async getFormData(tableName: string): Promise<IFieldMeta$1[] | {
     field_name: string;
     type: number;
     property?: {
@@ -43,9 +43,9 @@ async getFieldsData(tableName: string) :Promise<IFieldMeta$1[] | {
 }[] | undefined>
 ```
 
-## 获取数据表记录数据
+## 获取生成列表页需要的数据
 ```typescript 
-async getRecordsData(tableName: string) :Promise<any[][] | {
+async getListData(tableName: string): Promise<{
     fields: Record<string, string | number | boolean | string[] | {
         text?: string | undefined;
         link?: string | undefined;
@@ -63,11 +63,33 @@ async getRecordsData(tableName: string) :Promise<any[][] | {
     }[]>;
     ... 4 more ...;
     last_modified_time?: number | undefined;
-}[] | undefined>
+}[] | {
+    ...;
+} | undefined>
 ```
 
-# 通常你需要创建的页面有三种： 表信息页面，表记录详情页面和数据表表单页面。
-表信息页面： 需要获取数据表字段和记录信息，生成一个页面，以一个列表展示所有的字段和所有记录。
-表记录详情页面： 需要获取数据表字段和记录信息，为其中的一条记录生成一个详情页面，页面内容为这条记录在每个字段下的值。
-数据表表单页面： 需要获取数据表字段信息，生成一个页面展示所有字段，并且允许用户在对应字段下填写信息以产生一条新纪录。
 
+## 获取生成记录详情页需要的数据
+```typescript 
+async getDetailData(tableName: string, recordId: string): Promise<{
+    fieldName: string;
+    value: IOpenCellValue;
+}[] | Record<string, string | number | boolean | string[] | {
+    text?: string | undefined;
+    link?: string | undefined;
+} | {
+    ...;
+} | {
+    ...;
+}[] | {
+    ...;
+}[] | {
+    ...;
+}[]> | undefined>
+```
+
+
+# 通常你需要创建的页面有三种： 列表页面，表单页面和记录详情页面。
+列表页面： 需要获取数据表所有记录信息，生成一个页面，以一个表格展示所有记录的值。
+表单页面： 需要获取数据表字段信息，生成一个页面展示所有字段，并且允许用户在对应字段下填写信息以产生一条新纪录。
+记录详情页面： 需要获取数据表一条记录信息，为这条记录生成一个详情页面，页面内容为这条记录在每个字段下的值。此时将全局变量中的recordId作为你需要用到的输入参数。
