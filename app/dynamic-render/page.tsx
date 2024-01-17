@@ -5,7 +5,6 @@ import { runCodeSync } from '../code_runner'
 import React, { useEffect, useState } from 'react'
 import { kv } from '@vercel/kv'
 import { URLSearchParams } from 'next/dist/compiled/@edge-runtime/primitives/url'
-
 import { getCode, getDetailData_page, getFormData_page, getListData_page } from 'app/actions'
 import { useParams, useSearchParams } from 'next/navigation'
 import { BaseAISDK } from '@/lib/base-ai-sdk/base-ai-sdk'
@@ -25,7 +24,7 @@ function DynamicRender() {
         getCode(uuid).then(c => {
             setCode(c);
             console.log('fetched-code------', c, uuid)
-            console.log("Babel", Babel)
+            // console.log("Babel", Babel)
             setLoading(false);
         })
 

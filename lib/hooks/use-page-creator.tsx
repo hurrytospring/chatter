@@ -34,15 +34,57 @@ export const pageCreatorFnDef = {
   }
 }
 // 子agent自己用的function call
-const dynamicOutputDef = {
-  name: 'gen_page_from_code',
-  description: '执行代码并创建页面，返回结果将告诉你创建是否成功',
+// const dynamicOutputDef = {
+//   name: 'gen_page_from_code',
+//   description: '执行代码并创建页面，返回结果将告诉你创建是否成功',
+//   parameters: {
+//     type: 'object',
+//     properties: {
+//       code: {
+//         type: 'string',
+//         description: 'javascript code'
+//       }
+//     },
+//     required: ['code']
+//   }
+// }
+const dynamicOutputDef2 = {
+  name: 'generate_listPage_from_code',
+  description: '执行代码并创建列表页面，返回结果将告诉你创建是否成功',
   parameters: {
     type: 'object',
     properties: {
       code: {
         type: 'string',
-        description: 'javascript code'
+        description: '用来创建列表页面的javascript代码'
+      }
+    },
+    required: ['code']
+  }
+}
+const dynamicOutputDef3 = {
+  name: 'generate_formPage_from_code',
+  description: '执行代码并创建表单页面，返回结果将告诉你创建是否成功',
+  parameters: {
+    type: 'object',
+    properties: {
+      code: {
+        type: 'string',
+        description: '用来创建表单页面的javascript代码'
+      }
+    },
+    required: ['code']
+  }
+}
+const dynamicOutputDef4 = {
+  name: 'generate_detailPages_from_code',
+  description: '执行代码并创建详情页面，返回结果将告诉你创建是否成功',
+  parameters: {
+    type: 'object',
+    properties: {
+      code: {
+        type: 'string',
+        description: '用来创建详情页面的javascript代码'
       }
     },
     required: ['code']
@@ -63,9 +105,9 @@ export const usePageCreatorAgent = (operate: Operator) => {
     api: '/api/chat-common',
     body: {
       modelConfig: {
-        model: 'gpt-3.5-turbo',
-        // model: 'gpt-4-1106-preview',
-        functions: [dynamicOutputDef]
+        // model: 'gpt-3.5-turbo',
+        model: 'gpt-4-1106-preview',
+        functions: [dynamicOutputDef2,dynamicOutputDef3,dynamicOutputDef4]
         // tools: [
         //   {
         //     function: dynamicOutputDef,
@@ -85,7 +127,91 @@ export const usePageCreatorAgent = (operate: Operator) => {
       let urls: string[] =[]
       console.log('!!!!!!!!!!got function call!!!!!!!!!!:\n', functionCall)
 
-      if (functionCall.name == 'gen_page_from_code') {
+      // if (functionCall.name == 'gen_page_from_code') {
+      //   try {
+
+      //     // 使用正则表达式替换所有反引号为双引号
+      //     const args = parseJSON(functionCall.arguments || '{}')
+          
+      //     const code = args.code
+      //     const table =await BaseAISDK.getTable()
+      //     const recordIds = await table.getRecordIdList()
+      //     console.log('!!!!!!!!!!code!!!!!!!!!!\n', code)
+      //     urls = await saveCode(code,recordIds)
+      //     console.log('!!!!!!!!!!!urls!!!!!!!!!!!\n', urls)
+          
+
+      //     // setPageStatus("loaded")
+      //     operate({
+      //       type: 'add',
+      //       data: {
+      //         id: nanoid(),
+      //         content: code,
+      //         type: 'Dynamic',
+      //         createdAt: new Date()
+      //       }
+      //     })
+      //   } catch (e) {
+      //     console.log('parse code err:')
+      //     console.error(e)
+      //   }
+      // }
+      if (functionCall.name == 'generate_listPage_from_code') {
+        try {
+
+          // 使用正则表达式替换所有反引号为双引号
+          const args = parseJSON(functionCall.arguments || '{}')
+          
+          const code = args.code
+          console.log('!!!!!!!!!!code!!!!!!!!!!\n', code)
+          urls = await saveCode(code)
+          console.log('!!!!!!!!!!!url!!!!!!!!!!!\n', urls)
+          
+
+          // setPageStatus("loaded")
+          // operate({
+          //   type: 'add',
+          //   data: {
+          //     id: nanoid(),
+          //     content: code,
+          //     type: 'Dynamic',
+          //     createdAt: new Date()
+          //   }
+          // })
+        } catch (e) {
+          console.log('parse code err:')
+          console.error(e)
+        }
+      }
+      if (functionCall.name == 'generate_formPage_from_code') {
+        try {
+
+          // 使用正则表达式替换所有反引号为双引号
+          const args = parseJSON(functionCall.arguments || '{}')
+          
+          const code = args.code
+
+          console.log('!!!!!!!!!!code!!!!!!!!!!\n', code)
+          urls = await saveCode(code)
+          console.log('!!!!!!!!!!!urls!!!!!!!!!!!\n', urls)
+          
+
+          // setPageStatus("loaded")
+          // operate({
+          //   type: 'add',
+          //   data: {
+          //     id: nanoid(),
+          //     content: code,
+          //     type: 'Dynamic',
+          //     createdAt: new Date()
+          //   }
+          // })
+        } catch (e) {
+          console.log('parse code err:')
+          console.error(e)
+        }
+      }
+      if (functionCall.name == 'generate_detailPages_from_code') {
         try {
 
           // 使用正则表达式替换所有反引号为双引号
@@ -95,32 +221,15 @@ export const usePageCreatorAgent = (operate: Operator) => {
           const table =await BaseAISDK.getTable()
           const recordIds = await table.getRecordIdList()
           console.log('!!!!!!!!!!code!!!!!!!!!!\n', code)
-          console.log('!!!!!!!!!!recordIds!!!!!!!!!!\n',recordIds)
           urls = await saveCode(code,recordIds)
           console.log('!!!!!!!!!!!urls!!!!!!!!!!!\n', urls)
-          
-
-          // setPageStatus("loaded")
-          operate({
-            type: 'add',
-            data: {
-              id: nanoid(),
-              content: code,
-              type: 'Dynamic',
-              createdAt: new Date()
-            }
-          })
+        
         } catch (e) {
           console.log('parse code err:')
           console.error(e)
         }
       }
-      // setMessages([...chatMessages,{
-      //   role: 'function' as const,
-      //   content: '生成页面的链接为：' + url,
-      //   id: nanoid(), createdAt: new Date(),
-      //   name: 'run_javascript_code',
-      // }])
+
       const functionResponse: ChatRequest = {
         messages: [...chatMessages,
         {

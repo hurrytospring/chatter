@@ -71,25 +71,24 @@ async getListData(tableName: string): Promise<{
 
 ## 获取生成记录详情页需要的数据
 ```typescript 
-async getDetailData(tableName: string, recordId: string): Promise<{
-    fieldName: string;
-    value: IOpenCellValue;
-}[] | Record<string, string | number | boolean | string[] | {
+async getDetailData(tableName: string, recordId: string): Promise<Record<string, string | number | boolean | string[] | {
     text?: string | undefined;
     link?: string | undefined;
 } | {
-    ...;
+    location?: string | undefined;
+    ... 5 more ...;
+    full_address?: string | undefined;
 } | {
     ...;
 }[] | {
     ...;
 }[] | {
     ...;
-}[]> | undefined>
+}[]>>
 ```
 
 
-# 通常你需要创建的页面有三种： 列表页面，表单页面和记录详情页面。
+# 通常你需要创建的页面有三种： 列表页面，表单页面和记录详情页面。需要你根据BaseAISDK中的上述方法生成代码
 列表页面： 需要获取数据表所有记录信息，生成一个页面，以一个表格展示所有记录的值。
-表单页面： 需要获取数据表字段信息，生成一个页面展示所有字段，并且允许用户在对应字段下填写信息以产生一条新纪录。
+表单页面： 需要获取数据表字段信息，生成一个页面展示所有字段，并且允许用户在对应字段下填写信息以提交一条新纪录。
 记录详情页面： 需要获取数据表一条记录信息，为这条记录生成一个详情页面，页面内容为这条记录在每个字段下的值。此时将全局变量中的recordId作为你需要用到的输入参数。

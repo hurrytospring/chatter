@@ -282,7 +282,7 @@ function uuid() {
 
 
 
-export async function saveCode(code: string, recordIds: string[]) {
+export async function saveCode(code: string, recordIds?: string[]) {
   // const KV_REST_API_URL = "https://valued-macaw-45725.kv.vercel-storage.com"
   // const KV_REST_API_TOKEN = "AbKdASQgN2FmZjk5ZTEtMjgzNS00ZWY5LThiNDktZTA4ZjgwZjdlMzEzODgzYTk4NDk1ODFjNDc5MmI5YjkxOGJiYjMyNDMxZmM="
   // const kv = createClient({
@@ -290,16 +290,23 @@ export async function saveCode(code: string, recordIds: string[]) {
   //   token: KV_REST_API_TOKEN,
   // })
   const urls = [];
+  if (recordIds) {
+    for (const recordId of recordIds) {
+      const newId = uuid();
+      console.log('kkkkkkkkkvvvvvvvvvv', await kv.hmset(newId, { 'code': code }));
 
-  for (const recordId of recordIds) {
+      let url = 'http://localhost:3000/dynamic-render?uuid=' + newId;
+      if (recordId) {
+        url += '&recordid=' + recordId;
+      }
+
+      urls.push(url);
+    }
+  }
+  else {
     const newId = uuid();
     console.log('kkkkkkkkkvvvvvvvvvv', await kv.hmset(newId, { 'code': code }));
-
     let url = 'http://localhost:3000/dynamic-render?uuid=' + newId;
-    if (recordId) {
-      url += '&recordid=' + recordId;
-    }
-
     urls.push(url);
   }
   return urls
